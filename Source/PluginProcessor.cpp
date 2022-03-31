@@ -108,15 +108,6 @@ void FilterPedalAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     rightChain.prepare(spec);
     
     updateFilters();
-    
-    leftChannelFifo.prepare(samplesPerBlock);
-    rightChannelFifo.prepare(samplesPerBlock);
-    
-    osc.initialise([](float x) { return std::sin(x); });
-    
-    spec.numChannels = getTotalNumOutputChannels();
-    osc.prepare(spec);
-    osc.setFrequency(200);
 }
 
 void FilterPedalAudioProcessor::releaseResources()
@@ -169,11 +160,6 @@ void FilterPedalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     updateFilters();
 
     juce::dsp::AudioBlock<float> block(buffer);
-    
-//    buffer.clear();
-//    
-//    juce::dsp::ProcessContextReplacing<float> stereoContext(block);
-//    osc.process(stereoContext);
 
     auto leftBlock = block.getSingleChannelBlock(0);
     auto rightBlock = block.getSingleChannelBlock(1);
@@ -183,9 +169,6 @@ void FilterPedalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
 
     leftChain.process(leftContext);
     rightChain.process(rightContext);
-    
-    leftChannelFifo.update(buffer);
-    rightChannelFifo.update(buffer);
 }
 
 //==============================================================================
