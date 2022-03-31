@@ -111,32 +111,25 @@ private:
     // access the processor object that created it.
     FilterPedalAudioProcessor& audioProcessor;
     
-    RotarySliderWithLabels peakFreqSlider,
-    peakGainSlider,
-    peakQualitySlider,
-    lowCutFreqSlider,
-    highCutFreqSlider,
-    lowCutSlopeSlider,
-    highCutSlopeSlider;
+    RotarySliderWithLabels lowCutFreqSlider,
+                           highCutFreqSlider,
+                           lowCutSlopeSlider,
+                           highCutSlopeSlider;
     
     ResponseCurveComponent responseCurveComponent;
     
     using APVTS = juce::AudioProcessorValueTreeState;
     using Attachment = APVTS::SliderAttachment;
     
-    Attachment peakFreqSliderAttachment,
-               peakGainSliderAttachment,
-               peakQualitySliderAttachment,
-               lowCutFreqSliderAttachment,
+    Attachment lowCutFreqSliderAttachment,
                highCutFreqSliderAttachment,
                lowCutSlopeSliderAttachment,
                highCutSlopeSliderAttachment;
     
-    PowerButton lowcutBypassButton, peakBypassButton, highcutBypassButton;
+    PowerButton lowcutBypassButton, /*peakBypassButton,*/ highcutBypassButton;
     
     using ButtonAttachment = APVTS::ButtonAttachment;
     ButtonAttachment lowcutBypassButtonAttachment,
-                     peakBypassButtonAttachment,
                      highcutBypassButtonAttachment;
     
     std::vector<juce::Component*> getComps();
