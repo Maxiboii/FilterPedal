@@ -50,6 +50,7 @@ struct RotarySliderWithLabels : juce::Slider
     };
     
     juce::Array<LabelPos> labels;
+    juce::Array<LabelPos> nameLabels;
     
     void paint(juce::Graphics& g) override;
     juce::Rectangle<int> getSliderBounds() const;

@@ -135,6 +135,21 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
                                       startAng,
                                       endAng,
                                       *this);
+
+    for( int i = 0; i < nameLabels.size(); ++i )
+    {
+        auto pos = labels[i].pos;
+        jassert(0.f <= pos);
+        jassert(pos <= 1.f);
+        
+        Rectangle<float> r;
+        auto str = nameLabels[i].label;
+        r.setSize(g.getCurrentFont().getStringWidth(str), getTextHeight());
+        r.setCentre(sliderBounds.getCentreX(), sliderBounds.getCentreY());
+        r.setY(0);
+
+        g.drawFittedText(str, r.toNearestInt(), juce::Justification::centred, 1);
+    }
     
     auto center = sliderBounds.toFloat().getCentre();
     auto radius = sliderBounds.getWidth() * 0.5f;
@@ -169,11 +184,11 @@ juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
     
     auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
     
-    size -= getTextHeight() * 2;
+    size -= getTextHeight() * 3;
     juce::Rectangle<int> r;
     r.setSize(size, size);
     r.setCentre(bounds.getCentreX(), 0);
-    r.setY(2);
+    r.setY(r.getHeight() * 0.2);
     
     return r;
 }
@@ -512,30 +527,39 @@ delayBypassButtonAttachment(audioProcessor.apvts, "Peak Bypassed", peakBypassBut
     
     peakFreqSlider.labels.add({0.f, "20Hz"});
     peakFreqSlider.labels.add({1.f, "20kHz"});
+    peakFreqSlider.nameLabels.add({0.f, "Freq"});
     
     peakGainSlider.labels.add({0.f, "-24dB"});
     peakGainSlider.labels.add({1.f, "24dB"});
+    peakGainSlider.nameLabels.add({0.f, "Gain"});
     
     lowCutFreqSlider.labels.add({0.f, "20Hz"});
     lowCutFreqSlider.labels.add({1.f, "20kHz"});
+    lowCutFreqSlider.nameLabels.add({0.f, "Freq"});
     
     highCutFreqSlider.labels.add({0.f, "20Hz"});
     highCutFreqSlider.labels.add({1.f, "20kHz"});
+    highCutFreqSlider.nameLabels.add({0.f, "Freq"});
     
     lowCutSlopeSlider.labels.add({0.f, "12"});
     lowCutSlopeSlider.labels.add({1.f, "48"});
+    lowCutSlopeSlider.nameLabels.add({0.f, "Slope"});
     
     highCutSlopeSlider.labels.add({0.f, "12"});
     highCutSlopeSlider.labels.add({1.f, "48"});
+    highCutSlopeSlider.nameLabels.add({0.f, "Slope"});
     
     mixDelaySlider.labels.add({0.f, "12"});
     mixDelaySlider.labels.add({1.f, "48"});
+    mixDelaySlider.nameLabels.add({0.f, "Mix"});
     
     amountDelaySlider.labels.add({0.f, "12"});
     amountDelaySlider.labels.add({1.f, "48"});
+    amountDelaySlider.nameLabels.add({0.f, "Amount"});
     
     feedbackDelaySlider.labels.add({0.f, "12"});
     feedbackDelaySlider.labels.add({1.f, "48"});
+    feedbackDelaySlider.nameLabels.add({0.f, "Feedback"});
     
     for( auto* comp: getComps() )
     {
