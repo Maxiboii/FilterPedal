@@ -303,12 +303,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Freq",
                                                            "Peak Freq",
-                                                           juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
-                                                           750.f));
+                                                           juce::NormalisableRange<float>(20.f, 24.f, 0.5f, 1.f),
+                                                           0.f));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Gain",
                                                            "Peak Gain",
-                                                           juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
+                                                           juce::NormalisableRange<float>(0.f, 24.f, 0.5f, 1.f),
                                                            0.f));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Quality",

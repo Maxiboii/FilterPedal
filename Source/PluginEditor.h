@@ -113,7 +113,6 @@ private:
     
     RotarySliderWithLabels peakFreqSlider,
     peakGainSlider,
-    peakQualitySlider,
     lowCutFreqSlider,
     highCutFreqSlider,
     lowCutSlopeSlider,
@@ -126,7 +125,6 @@ private:
     
     Attachment peakFreqSliderAttachment,
                peakGainSliderAttachment,
-               peakQualitySliderAttachment,
                lowCutFreqSliderAttachment,
                highCutFreqSliderAttachment,
                lowCutSlopeSliderAttachment,
