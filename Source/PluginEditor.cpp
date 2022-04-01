@@ -487,6 +487,9 @@ lowCutFreqSlider(*audioProcessor.apvts.getParameter("LowCut Freq"), "Hz"),
 highCutFreqSlider(*audioProcessor.apvts.getParameter("HighCut Freq"), "Hz"),
 lowCutSlopeSlider(*audioProcessor.apvts.getParameter("LowCut Slope"), "dB/Oct"),
 highCutSlopeSlider(*audioProcessor.apvts.getParameter("HighCut Slope"), "dB/Oct"),
+mixDelaySlider(*audioProcessor.apvts.getParameter("Peak Freq"), "Hz"),
+amountDelaySlider(*audioProcessor.apvts.getParameter("Peak Freq"), "Hz"),
+feedbackDelaySlider(*audioProcessor.apvts.getParameter("Peak Freq"), "Hz"),
 
 responseCurveComponent(audioProcessor),
 peakFreqSliderAttachment(audioProcessor.apvts, "Peak Freq", peakFreqSlider),
@@ -495,10 +498,14 @@ lowCutFreqSliderAttachment(audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider
 highCutFreqSliderAttachment(audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
 lowCutSlopeSliderAttachment(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSlider),
 highCutSlopeSliderAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSlider),
+mixDelaySliderAttachment(audioProcessor.apvts, "Peak Freq", mixDelaySlider),
+amountDelaySliderAttachment(audioProcessor.apvts, "Peak Freq", amountDelaySlider),
+feedbackDelaySliderAttachment(audioProcessor.apvts, "Peak Freq", feedbackDelaySlider),
 
 lowcutBypassButtonAttachment(audioProcessor.apvts, "LowCut Bypassed", lowcutBypassButton),
 peakBypassButtonAttachment(audioProcessor.apvts, "Peak Bypassed", peakBypassButton),
-highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutBypassButton)
+highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutBypassButton),
+delayBypassButtonAttachment(audioProcessor.apvts, "Peak Bypassed", peakBypassButton)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -521,6 +528,15 @@ highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutB
     highCutSlopeSlider.labels.add({0.f, "12"});
     highCutSlopeSlider.labels.add({1.f, "48"});
     
+    mixDelaySlider.labels.add({0.f, "12"});
+    mixDelaySlider.labels.add({1.f, "48"});
+    
+    amountDelaySlider.labels.add({0.f, "12"});
+    amountDelaySlider.labels.add({1.f, "48"});
+    
+    feedbackDelaySlider.labels.add({0.f, "12"});
+    feedbackDelaySlider.labels.add({1.f, "48"});
+    
     for( auto* comp: getComps() )
     {
         addAndMakeVisible(comp);
@@ -529,6 +545,7 @@ highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutB
     peakBypassButton.setLookAndFeel(&lnf);
     lowcutBypassButton.setLookAndFeel(&lnf);
     highcutBypassButton.setLookAndFeel(&lnf);
+    delayBypassButton.setLookAndFeel(&lnf);
     
     auto safePtr = juce::Component::SafePointer<FilterPedalAudioProcessorEditor>(this);
     peakBypassButton.onClick = [safePtr]()
@@ -564,6 +581,18 @@ highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutB
         }
     };
     
+    delayBypassButton.onClick = [safePtr]()
+    {
+        if( auto* comp = safePtr.getComponent() )
+        {
+            auto bypassed = comp->delayBypassButton.getToggleState();
+            
+            comp->mixDelaySlider.setEnabled( !bypassed );
+            comp->amountDelaySlider.setEnabled( !bypassed );
+            comp->feedbackDelaySlider.setEnabled( !bypassed );
+        }
+    };
+    
     setSize (600, 480);
 }
 
@@ -572,6 +601,7 @@ FilterPedalAudioProcessorEditor::~FilterPedalAudioProcessorEditor()
     peakBypassButton.setLookAndFeel(nullptr);
     lowcutBypassButton.setLookAndFeel(nullptr);
     highcutBypassButton.setLookAndFeel(nullptr);
+    delayBypassButton.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
@@ -599,7 +629,8 @@ void FilterPedalAudioProcessorEditor::resized()
     bounds.removeFromTop(5);
     
     auto filterBounds = bounds.removeFromLeft(bounds.getWidth() * 0.5);
-    auto saturationBounds = bounds.removeFromLeft(bounds.getWidth() * 0.75);
+    auto saturationBounds = bounds.removeFromLeft(bounds.getWidth() * 0.5);
+    auto delayBounds = bounds;
     
     auto lowCutArea = filterBounds.removeFromLeft(filterBounds.getWidth() * 0.5);
     auto highCutArea = filterBounds;
@@ -615,6 +646,11 @@ void FilterPedalAudioProcessorEditor::resized()
     peakBypassButton.setBounds(saturationBounds.removeFromTop(25));
     peakGainSlider.setBounds(saturationBounds.removeFromTop(saturationBounds.getHeight() * 0.5));
     peakFreqSlider.setBounds(saturationBounds);
+    
+    delayBypassButton.setBounds(delayBounds.removeFromTop(25));
+    mixDelaySlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * 0.33));
+    amountDelaySlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * 0.5));
+    feedbackDelaySlider.setBounds(delayBounds);
 }
 
 std::vector<juce::Component*> FilterPedalAudioProcessorEditor::getComps()
@@ -628,9 +664,13 @@ std::vector<juce::Component*> FilterPedalAudioProcessorEditor::getComps()
         &lowCutSlopeSlider,
         &highCutSlopeSlider,
         &responseCurveComponent,
+        &mixDelaySlider,
+        &amountDelaySlider,
+        &feedbackDelaySlider,
         
         &lowcutBypassButton,
         &peakBypassButton,
-        &highcutBypassButton
+        &highcutBypassButton,
+        &delayBypassButton
     };
 }

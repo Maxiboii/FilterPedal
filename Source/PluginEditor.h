@@ -116,7 +116,10 @@ private:
     lowCutFreqSlider,
     highCutFreqSlider,
     lowCutSlopeSlider,
-    highCutSlopeSlider;
+    highCutSlopeSlider,
+    mixDelaySlider,
+    amountDelaySlider,
+    feedbackDelaySlider;
     
     ResponseCurveComponent responseCurveComponent;
     
@@ -128,14 +131,18 @@ private:
                lowCutFreqSliderAttachment,
                highCutFreqSliderAttachment,
                lowCutSlopeSliderAttachment,
-               highCutSlopeSliderAttachment;
+               highCutSlopeSliderAttachment,
+               mixDelaySliderAttachment,
+               amountDelaySliderAttachment,
+               feedbackDelaySliderAttachment;
     
-    PowerButton lowcutBypassButton, peakBypassButton, highcutBypassButton;
+    PowerButton lowcutBypassButton, peakBypassButton, highcutBypassButton, delayBypassButton;
     
     using ButtonAttachment = APVTS::ButtonAttachment;
     ButtonAttachment lowcutBypassButtonAttachment,
                      peakBypassButtonAttachment,
-                     highcutBypassButtonAttachment;
+                     highcutBypassButtonAttachment,
+                     delayBypassButtonAttachment;
     
     std::vector<juce::Component*> getComps();
     
