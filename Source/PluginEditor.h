@@ -112,38 +112,38 @@ private:
     // access the processor object that created it.
     FilterPedalAudioProcessor& audioProcessor;
     
-    RotarySliderWithLabels peakFreqSlider,
-    peakGainSlider,
-    lowCutFreqSlider,
-    highCutFreqSlider,
-    lowCutSlopeSlider,
-    highCutSlopeSlider,
-    mixDelaySlider,
-    amountDelaySlider,
-    feedbackDelaySlider;
+    RotarySliderWithLabels lowCutFreqSlider,
+                           lowCutSlopeSlider,
+                           highCutFreqSlider,
+                           highCutSlopeSlider,
+                           distortionAmountSlider,
+    distortionGainSlider;
+//                           mixDelaySlider,
+//                           amountDelaySlider,
+//                           feedbackDelaySlider;
     
     ResponseCurveComponent responseCurveComponent;
     
     using APVTS = juce::AudioProcessorValueTreeState;
     using Attachment = APVTS::SliderAttachment;
     
-    Attachment peakFreqSliderAttachment,
-               peakGainSliderAttachment,
-               lowCutFreqSliderAttachment,
-               highCutFreqSliderAttachment,
+    Attachment lowCutFreqSliderAttachment,
                lowCutSlopeSliderAttachment,
-               highCutSlopeSliderAttachment,
-               mixDelaySliderAttachment,
-               amountDelaySliderAttachment,
-               feedbackDelaySliderAttachment;
+               highCutFreqSliderAttachment,
+    highCutSlopeSliderAttachment;
+//               distortionAmountSliderAttachment,
+//               distortionGainSliderAttachment,
+//               mixDelaySliderAttachment,
+//               amountDelaySliderAttachment,
+//               feedbackDelaySliderAttachment;
     
-    PowerButton lowcutBypassButton, peakBypassButton, highcutBypassButton, delayBypassButton;
+    PowerButton lowcutBypassButton, highcutBypassButton, distortionBypassButton;//, delayBypassButton;
     
     using ButtonAttachment = APVTS::ButtonAttachment;
     ButtonAttachment lowcutBypassButtonAttachment,
-                     peakBypassButtonAttachment,
                      highcutBypassButtonAttachment,
-                     delayBypassButtonAttachment;
+    distortionBypassButtonAttachment;
+//                     delayBypassButtonAttachment;
     
     std::vector<juce::Component*> getComps();
     

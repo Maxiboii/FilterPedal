@@ -80,12 +80,13 @@ enum Slope
 
 struct ChainSettings
 {
-    float peakFreq { 0 }, peakGainInDecibels { 0 }, peakQuality {1.f};
     float lowCutFreq { 0 }, highCutFreq { 0 };
     
     Slope lowCutSlope { Slope::Slope_12 }, highCutSlope { Slope::Slope_12 };
     
-    bool lowCutBypassed { false }, peakBypassed { false }, highCutBypassed { false };
+    float distortionAmount { 0 }, distortionGainInDecibels { 0 };
+    
+    bool lowCutBypassed { false }, highCutBypassed { false }, distortionBypassed { false };
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
@@ -94,13 +95,13 @@ using Filter = juce::dsp::IIR::Filter<float>;
 
 using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
 
-using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, Filter, Distortion<float>>;
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, Distortion<float>>;
 
 enum ChainPositions
 {
     LowCut,
     HighCut,
-    Peak,
+//    Peak,
 //    Distortion_
 };
 
