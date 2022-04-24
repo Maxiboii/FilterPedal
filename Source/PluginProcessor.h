@@ -30,6 +30,13 @@ public:
         auto& postGain = processorChain.template get<postGainIndex>();
         postGain.setGainDecibels (0.0f);
     }
+    
+//    template<typename ChainType, typename CoefficientType>
+//    void updateDistortion (ChainType& chain,
+//                           const CoefficientType& coefficients)
+//    {
+//
+//    }
 
     //==============================================================================
     void prepare (const juce::dsp::ProcessSpec& spec)
@@ -102,7 +109,7 @@ enum ChainPositions
     LowCut,
     HighCut,
 //    Peak,
-//    Distortion_
+    Distortion_
 };
 
 using Coefficients = Filter::CoefficientsPtr;
@@ -213,10 +220,11 @@ public:
 private:
     MonoChain leftChain, rightChain;
     
-    void updatePeakFilter(const ChainSettings& chainSettings);
+//    void updatePeakFilter(const ChainSettings& chainSettings);
     
     void updateLowCutFilters(const ChainSettings& chainSettings);
     void updateHighCutFilters(const ChainSettings& chainSettings);
+    void updateDistortion(const ChainSettings& chainSettings);
     
     void updateFilters();
     

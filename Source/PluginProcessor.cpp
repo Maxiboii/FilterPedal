@@ -233,14 +233,14 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 //                                                               juce::Decibels::decibelsToGain(chainSettings.distortionGainInDecibels));
 //}
 
-//void FilterPedalAudioProcessor::updatePeakFilter(const ChainSettings &chainSettings)
+//void FilterPedalAudioProcessor::updateDistortion(const ChainSettings &chainSettings)
 //{
-//    auto peakCoefficients = makePeakFilter(chainSettings, getSampleRate());
+//    auto peakCoefficients = Distortion<float>::updateDistortion(chainSettings, getSampleRate());
 //
-//    leftChain.setBypassed<ChainPositions::Peak>(chainSettings.distortionBypassed);
-//    rightChain.setBypassed<ChainPositions::Peak>(chainSettings.distortionBypassed);
+//    leftChain.setBypassed<ChainPositions::Distortion_>(chainSettings.distortionBypassed);
+//    rightChain.setBypassed<ChainPositions::Distortion_>(chainSettings.distortionBypassed);
 //
-////    updateCoefficients(leftChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+////    updateCoefficients(leftChain.get<ChainPositions::Distortion_>().coefficients, peakCoefficients);
 ////    updateCoefficients(rightChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
 //}
 
@@ -282,8 +282,8 @@ void FilterPedalAudioProcessor::updateFilters()
     auto chainSettings = getChainSettings(apvts);
     
     updateLowCutFilters(chainSettings);
-//    updatePeakFilter(chainSettings);
     updateHighCutFilters(chainSettings);
+//    updateDistortion(chainSettings);
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::createParameterLayout()
@@ -302,12 +302,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Distortion Amount",
                                                            "Distortion Amount",
-                                                           juce::NormalisableRange<float>(20.f, 24.f, 0.5f, 1.f),
+                                                           juce::NormalisableRange<float>(0.f, 24.f, 0.5f, 1.f),
                                                            0.f));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("Distortion Gain",
                                                            "Distortion Gain",
-                                                           juce::NormalisableRange<float>(0.f, 24.f, 0.5f, 1.f),
+                                                           juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
                                                            0.f));
 
     
