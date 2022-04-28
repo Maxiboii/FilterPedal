@@ -22,6 +22,7 @@ FilterPedalAudioProcessor::FilterPedalAudioProcessor()
                        )
 #endif
 {
+    distortion = std::make_unique<Distortion<float>>();
 }
 
 FilterPedalAudioProcessor::~FilterPedalAudioProcessor()
@@ -233,16 +234,18 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 //                                                               juce::Decibels::decibelsToGain(chainSettings.distortionGainInDecibels));
 //}
 
-//void FilterPedalAudioProcessor::updateDistortion(const ChainSettings &chainSettings)
-//{
-//    auto peakCoefficients = Distortion<float>::updateDistortion(chainSettings, getSampleRate());
-//
-//    leftChain.setBypassed<ChainPositions::Distortion_>(chainSettings.distortionBypassed);
-//    rightChain.setBypassed<ChainPositions::Distortion_>(chainSettings.distortionBypassed);
-//
-////    updateCoefficients(leftChain.get<ChainPositions::Distortion_>().coefficients, peakCoefficients);
-////    updateCoefficients(rightChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
-//}
+void FilterPedalAudioProcessor::updateDistortion(const ChainSettings &chainSettings)
+{
+    distortion.get()->updateDistortion(chainSettings, getSampleRate());
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    std::cout << chainSettings.distortionAmount << std::endl;
+    std::cout << chainSettings.distortionGainInDecibels << std::endl;
+    leftChain.setBypassed<ChainPositions::Distortion_>(chainSettings.distortionBypassed);
+    rightChain.setBypassed<ChainPositions::Distortion_>(chainSettings.distortionBypassed);
+
+//    updateCoefficients(leftChain.get<ChainPositions::Distortion_>().coefficients, peakCoefficients);
+//    updateCoefficients(rightChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+}
 
 void updateCoefficients(Coefficients &old, const Coefficients &replacements)
 {
@@ -279,11 +282,13 @@ void FilterPedalAudioProcessor::updateHighCutFilters(const ChainSettings &chainS
 
 void FilterPedalAudioProcessor::updateFilters()
 {
+    
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
     auto chainSettings = getChainSettings(apvts);
     
     updateLowCutFilters(chainSettings);
     updateHighCutFilters(chainSettings);
-//    updateDistortion(chainSettings);
+    updateDistortion(chainSettings);
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::createParameterLayout()

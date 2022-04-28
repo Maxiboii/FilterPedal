@@ -14,52 +14,6 @@
 template <typename Type>
 class Distortion
 {
-public:
-    //==============================================================================
-    Distortion()
-    {
-        auto& waveshaper = processorChain.template get<waveshaperIndex>();
-        waveshaper.functionToUse = [] (Type x)
-                                   {
-                                       return std::tanh (x);
-                                   };
-
-        auto& preGain = processorChain.template get<preGainIndex>();
-        preGain.setGainDecibels (50.0f);
-
-        auto& postGain = processorChain.template get<postGainIndex>();
-        postGain.setGainDecibels (0.0f);
-    }
-    
-//    template<typename ChainType, typename CoefficientType>
-//    void updateDistortion (ChainType& chain,
-//                           const CoefficientType& coefficients)
-//    {
-//
-//    }
-
-    //==============================================================================
-    void prepare (const juce::dsp::ProcessSpec& spec)
-    {
-        auto& filter = processorChain.template get<filterIndex>();
-        filter.state = FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, 1000.0f);
-
-        processorChain.prepare (spec);
-    }
-
-    //==============================================================================
-    template <typename ProcessContext>
-    void process (const ProcessContext& context) noexcept
-    {
-        processorChain.process (context);
-    }
-
-    //==============================================================================
-    void reset() noexcept
-    {
-        processorChain.reset();
-    }
-
 private:
     //==============================================================================
     enum
@@ -72,9 +26,74 @@ private:
 
     using Filter = juce::dsp::IIR::Filter<Type>;
     using FilterCoefs = juce::dsp::IIR::Coefficients<Type>;
+    using ProcessorDuplicator = juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>;
+    using Gain = juce::dsp::Gain<Type>;
+    using WaveShaper = juce::dsp::WaveShaper<Type>;
+    using ProcessorChain = juce::dsp::ProcessorChain<ProcessorDuplicator, Gain, WaveShaper, Gain>;
 
-    juce::dsp::ProcessorChain<juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>,
-                              juce::dsp::Gain<Type>, juce::dsp::WaveShaper<Type>, juce::dsp::Gain<Type>> processorChain;
+    std::unique_ptr<ProcessorChain> processorChain;
+    
+public:
+    //==============================================================================
+    Distortion()
+    {
+        
+        processorChain = std::make_unique<ProcessorChain>();
+        
+        auto& waveshaper = processorChain->template get<waveshaperIndex>();
+        waveshaper.functionToUse = [] (Type x)
+                                   {
+                                       return std::tanh (x);
+                                   };
+
+        auto& preGain = processorChain->template get<preGainIndex>();
+        preGain.setGainDecibels (50.0f);
+
+        auto& postGain = processorChain->template get<postGainIndex>();
+        postGain.setGainDecibels (0.0f);
+    }
+    
+    template<typename ChainType, typename CoefficientType>
+    void updateDistortion (ChainType& chain,
+                           const CoefficientType& coefficients)
+    {
+        
+        
+        
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        std::cout << chain.distortionAmount << std::endl;
+        std::cout << chain.distortionGainInDecibels << std::endl;
+        
+        auto& preGain = processorChain->template get<preGainIndex>();
+        preGain.setGainDecibels (chain.distortionAmount);
+
+        auto& postGain = processorChain->template get<postGainIndex>();
+        postGain.setGainDecibels (chain.distortionGainInDecibels);
+    }
+
+    //==============================================================================
+    void prepare (const juce::dsp::ProcessSpec& spec)
+    {
+        auto& filter = processorChain->template get<filterIndex>();
+        filter.state = FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, 1000.0f);
+
+        processorChain.get()->prepare (spec);
+    }
+
+    //==============================================================================
+    template <typename ProcessContext>
+    void process (const ProcessContext& context) noexcept
+    {
+        processorChain.get()->process (context);
+    }
+
+    //==============================================================================
+    void reset() noexcept
+    {
+        processorChain.reset();
+    }
+
+
 };
 
 enum Slope
@@ -219,6 +238,8 @@ public:
     
 private:
     MonoChain leftChain, rightChain;
+    
+    std::unique_ptr<Distortion<float>> distortion;
     
 //    void updatePeakFilter(const ChainSettings& chainSettings);
     
