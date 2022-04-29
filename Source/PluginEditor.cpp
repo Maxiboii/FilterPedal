@@ -502,7 +502,7 @@ highCutSlopeSlider(*audioProcessor.apvts.getParameter("HighCut Slope"), "dB/Oct"
 distortionPreGainSlider(*audioProcessor.apvts.getParameter("Distortion Amount"), "dB"),
 distortionPostGainSlider(*audioProcessor.apvts.getParameter("Distortion PostGain"), "dB"),
 //mixDelaySlider(*audioProcessor.apvts.getParameter("Peak Freq"), "Hz"),
-//amountDelaySlider(*audioProcessor.apvts.getParameter("Peak Freq"), "Hz"),
+amountDelaySlider(*audioProcessor.apvts.getParameter("Delay Amount"), ""),
 //feedbackDelaySlider(*audioProcessor.apvts.getParameter("Peak Freq"), "Hz"),
 
 responseCurveComponent(audioProcessor),
@@ -513,13 +513,13 @@ highCutSlopeSliderAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlope
 distortionPreGainSliderAttachment(audioProcessor.apvts, "Distortion Amount", distortionPreGainSlider),
 distortionPostGainSliderAttachment(audioProcessor.apvts, "Distortion PostGain", distortionPostGainSlider),
 //mixDelaySliderAttachment(audioProcessor.apvts, "Peak Freq", mixDelaySlider),
-//amountDelaySliderAttachment(audioProcessor.apvts, "Peak Freq", amountDelaySlider),
+amountDelaySliderAttachment(audioProcessor.apvts, "Delay Amount", amountDelaySlider),
 //feedbackDelaySliderAttachment(audioProcessor.apvts, "Peak Freq", feedbackDelaySlider),
 
 lowcutBypassButtonAttachment(audioProcessor.apvts, "LowCut Bypassed", lowcutBypassButton),
 highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutBypassButton),
-distortionBypassButtonAttachment(audioProcessor.apvts, "Distortion Bypassed", distortionBypassButton)
-//delayBypassButtonAttachment(audioProcessor.apvts, "Peak Bypassed", distortionBypassButton)
+distortionBypassButtonAttachment(audioProcessor.apvts, "Distortion Bypassed", distortionBypassButton),
+delayBypassButtonAttachment(audioProcessor.apvts, "Delay Bypassed", distortionBypassButton)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -551,10 +551,10 @@ distortionBypassButtonAttachment(audioProcessor.apvts, "Distortion Bypassed", di
 //    mixDelaySlider.labels.add({0.f, "12"});
 //    mixDelaySlider.labels.add({1.f, "48"});
 //    mixDelaySlider.nameLabels.add({0.f, "Mix"});
-//
-//    amountDelaySlider.labels.add({0.f, "12"});
-//    amountDelaySlider.labels.add({1.f, "48"});
-//    amountDelaySlider.nameLabels.add({0.f, "Amount"});
+
+    amountDelaySlider.labels.add({0.f, "12"});
+    amountDelaySlider.labels.add({1.f, "48"});
+    amountDelaySlider.nameLabels.add({0.f, "Amount"});
 //
 //    feedbackDelaySlider.labels.add({0.f, "12"});
 //    feedbackDelaySlider.labels.add({1.f, "48"});
@@ -568,7 +568,7 @@ distortionBypassButtonAttachment(audioProcessor.apvts, "Distortion Bypassed", di
     lowcutBypassButton.setLookAndFeel(&lnf);
     highcutBypassButton.setLookAndFeel(&lnf);
     distortionBypassButton.setLookAndFeel(&lnf);
-//    delayBypassButton.setLookAndFeel(&lnf);
+    delayBypassButton.setLookAndFeel(&lnf);
     
     auto safePtr = juce::Component::SafePointer<FilterPedalAudioProcessorEditor>(this);
     lowcutBypassButton.onClick = [safePtr]()
@@ -604,17 +604,17 @@ distortionBypassButtonAttachment(audioProcessor.apvts, "Distortion Bypassed", di
         }
     };
     
-//    delayBypassButton.onClick = [safePtr]()
-//    {
-//        if( auto* comp = safePtr.getComponent() )
-//        {
-//            auto bypassed = comp->delayBypassButton.getToggleState();
-//
+    delayBypassButton.onClick = [safePtr]()
+    {
+        if( auto* comp = safePtr.getComponent() )
+        {
+            auto bypassed = comp->delayBypassButton.getToggleState();
+
 //            comp->mixDelaySlider.setEnabled( !bypassed );
-//            comp->amountDelaySlider.setEnabled( !bypassed );
+            comp->amountDelaySlider.setEnabled( !bypassed );
 //            comp->feedbackDelaySlider.setEnabled( !bypassed );
-//        }
-//    };
+        }
+    };
     
     setSize (600, 480);
 }
@@ -624,7 +624,7 @@ FilterPedalAudioProcessorEditor::~FilterPedalAudioProcessorEditor()
     lowcutBypassButton.setLookAndFeel(nullptr);
     highcutBypassButton.setLookAndFeel(nullptr);
     distortionBypassButton.setLookAndFeel(nullptr);
-//    delayBypassButton.setLookAndFeel(nullptr);
+    delayBypassButton.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
@@ -670,9 +670,9 @@ void FilterPedalAudioProcessorEditor::resized()
     distortionPreGainSlider.setBounds(saturationBounds.removeFromTop(saturationBounds.getHeight() * 0.5));
     distortionPostGainSlider.setBounds(saturationBounds);
     
-//    delayBypassButton.setBounds(delayBounds.removeFromTop(25));
+    delayBypassButton.setBounds(delayBounds.removeFromTop(25));
 //    mixDelaySlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * 0.33));
-//    amountDelaySlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * 0.5));
+    amountDelaySlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * 0.5));
 //    feedbackDelaySlider.setBounds(delayBounds);
 }
 
@@ -688,12 +688,12 @@ std::vector<juce::Component*> FilterPedalAudioProcessorEditor::getComps()
         &distortionPostGainSlider,
         &responseCurveComponent,
 //        &mixDelaySlider,
-//        &amountDelaySlider,
+        &amountDelaySlider,
 //        &feedbackDelaySlider,
         
         &lowcutBypassButton,
         &highcutBypassButton,
-        &distortionBypassButton//,
-//        &delayBypassButton
+        &distortionBypassButton,
+        &delayBypassButton
     };
 }

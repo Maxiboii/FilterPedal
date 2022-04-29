@@ -22,7 +22,6 @@ FilterPedalAudioProcessor::FilterPedalAudioProcessor()
                        )
 #endif
 {
-    distortion = std::make_unique<Distortion<float>>();
 }
 
 FilterPedalAudioProcessor::~FilterPedalAudioProcessor()
@@ -218,10 +217,12 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.highCutSlope = static_cast<Slope>(apvts.getRawParameterValue("HighCut Slope")->load());
     settings.distortionPreGainInDecibels = apvts.getRawParameterValue("Distortion Amount")->load();
     settings.distortionPostGainInDecibels = apvts.getRawParameterValue("Distortion PostGain")->load();
+    settings.delayAmount = apvts.getRawParameterValue("Delay Amount")->load();
     
     settings.lowCutBypassed = apvts.getRawParameterValue("LowCut Bypassed")->load() > 0.5f;
     settings.highCutBypassed = apvts.getRawParameterValue("HighCut Bypassed")->load() > 0.5f;
     settings.distortionBypassed = apvts.getRawParameterValue("Distortion Bypassed")->load() > 0.5f;
+    settings.delayBypassed = apvts.getRawParameterValue("Delay Bypassed")->load() > 0.5f;
 
     return settings;
 }
@@ -305,6 +306,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
                                                            "Distortion PostGain",
                                                            juce::NormalisableRange<float>(-48.f, 48.f, 0.5f, 1.f),
                                                            0.f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Amount",
+                                                           "Delay Amount",
+                                                           juce::NormalisableRange<float>(-48.f, 48.f, 0.5f, 1.f),
+                                                           0.f));
 
     
     juce::StringArray stringArray;
@@ -322,6 +328,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
     layout.add(std::make_unique<juce::AudioParameterBool>("LowCut Bypassed", "LowCut Bypassed", false));
     layout.add(std::make_unique<juce::AudioParameterBool>("HighCut Bypassed", "HighCut Bypassed", false));
     layout.add(std::make_unique<juce::AudioParameterBool>("Distortion Bypassed", "Distortion Bypassed", false));
+    layout.add(std::make_unique<juce::AudioParameterBool>("Delay Bypassed", "Delay Bypassed", false));
     
     return layout;
 }

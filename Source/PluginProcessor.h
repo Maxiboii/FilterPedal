@@ -28,7 +28,9 @@ struct ChainSettings
     
     float distortionPreGainInDecibels { 0 }, distortionPostGainInDecibels { 0 };
     
-    bool lowCutBypassed { false }, highCutBypassed { false }, distortionBypassed { false };
+    float delayAmount { 0 };
+    
+    bool lowCutBypassed { false }, highCutBypassed { false }, distortionBypassed { false }, delayBypassed { false };
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
@@ -48,6 +50,7 @@ enum ChainPositions
     LowCut,
     HighCut,
     WaveshapingDistortion,
+    DistortedDelay
 };
 
 using Coefficients = Filter::CoefficientsPtr;
