@@ -47,28 +47,27 @@ public:
                                    };
 
         auto& preGain = processorChain->template get<preGainIndex>();
-        preGain.setGainDecibels (50.0f);
+        preGain.setGainDecibels (0.0f);
 
         auto& postGain = processorChain->template get<postGainIndex>();
         postGain.setGainDecibels (0.0f);
     }
     
-    template<typename ChainType, typename CoefficientType>
-    void updateDistortion (ChainType& chain,
-                           const CoefficientType& coefficients)
+    template<typename ChainType, typename ChainSettings>
+    void updateValues (ChainType& chain, ChainSettings settings)
     {
         
         
         
         std::cout << __PRETTY_FUNCTION__ << std::endl;
-        std::cout << chain.distortionAmount << std::endl;
-        std::cout << chain.distortionGainInDecibels << std::endl;
+        std::cout << settings.distortionAmount << std::endl;
+        std::cout << settings.distortionGainInDecibels << std::endl;
         
         auto& preGain = processorChain->template get<preGainIndex>();
-        preGain.setGainDecibels (chain.distortionAmount);
+        preGain.setGainDecibels (settings.distortionAmount);
 
         auto& postGain = processorChain->template get<postGainIndex>();
-        postGain.setGainDecibels (chain.distortionGainInDecibels);
+        postGain.setGainDecibels (settings.distortionGainInDecibels);
     }
 
     //==============================================================================
