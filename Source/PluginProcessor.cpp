@@ -216,8 +216,8 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.lowCutSlope = static_cast<Slope>(apvts.getRawParameterValue("LowCut Slope")->load());
     settings.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
     settings.highCutSlope = static_cast<Slope>(apvts.getRawParameterValue("HighCut Slope")->load());
-    settings.distortionAmount = apvts.getRawParameterValue("Distortion Amount")->load();
-    settings.distortionGainInDecibels = apvts.getRawParameterValue("Distortion Gain")->load();
+    settings.distortionPreGainInDecibels = apvts.getRawParameterValue("Distortion Amount")->load();
+    settings.distortionPostGainInDecibels = apvts.getRawParameterValue("Distortion PostGain")->load();
     
     settings.lowCutBypassed = apvts.getRawParameterValue("LowCut Bypassed")->load() > 0.5f;
     settings.highCutBypassed = apvts.getRawParameterValue("HighCut Bypassed")->load() > 0.5f;
@@ -298,12 +298,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Distortion Amount",
                                                            "Distortion Amount",
-                                                           juce::NormalisableRange<float>(0.f, 24.f, 0.5f, 1.f),
+                                                           juce::NormalisableRange<float>(0.f, 48.f, 0.5f, 1.f),
                                                            0.f));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Distortion Gain",
-                                                           "Distortion Gain",
-                                                           juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Distortion PostGain",
+                                                           "Distortion PostGain",
+                                                           juce::NormalisableRange<float>(-48.f, 48.f, 0.5f, 1.f),
                                                            0.f));
 
     

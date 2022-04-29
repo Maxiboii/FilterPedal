@@ -499,8 +499,8 @@ lowCutFreqSlider(*audioProcessor.apvts.getParameter("LowCut Freq"), "Hz"),
 lowCutSlopeSlider(*audioProcessor.apvts.getParameter("LowCut Slope"), "dB/Oct"),
 highCutFreqSlider(*audioProcessor.apvts.getParameter("HighCut Freq"), "Hz"),
 highCutSlopeSlider(*audioProcessor.apvts.getParameter("HighCut Slope"), "dB/Oct"),
-distortionAmountSlider(*audioProcessor.apvts.getParameter("Distortion Amount"), "dB"),
-distortionGainSlider(*audioProcessor.apvts.getParameter("Distortion Gain"), "dB"),
+distortionPreGainSlider(*audioProcessor.apvts.getParameter("Distortion Amount"), "dB"),
+distortionPostGainSlider(*audioProcessor.apvts.getParameter("Distortion PostGain"), "dB"),
 //mixDelaySlider(*audioProcessor.apvts.getParameter("Peak Freq"), "Hz"),
 //amountDelaySlider(*audioProcessor.apvts.getParameter("Peak Freq"), "Hz"),
 //feedbackDelaySlider(*audioProcessor.apvts.getParameter("Peak Freq"), "Hz"),
@@ -510,8 +510,8 @@ lowCutFreqSliderAttachment(audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider
 lowCutSlopeSliderAttachment(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSlider),
 highCutFreqSliderAttachment(audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
 highCutSlopeSliderAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSlider),
-distortionAmountSliderAttachment(audioProcessor.apvts, "Distortion Amount", distortionAmountSlider),
-distortionGainSliderAttachment(audioProcessor.apvts, "Distortion Gain", distortionGainSlider),
+distortionPreGainSliderAttachment(audioProcessor.apvts, "Distortion Amount", distortionPreGainSlider),
+distortionPostGainSliderAttachment(audioProcessor.apvts, "Distortion PostGain", distortionPostGainSlider),
 //mixDelaySliderAttachment(audioProcessor.apvts, "Peak Freq", mixDelaySlider),
 //amountDelaySliderAttachment(audioProcessor.apvts, "Peak Freq", amountDelaySlider),
 //feedbackDelaySliderAttachment(audioProcessor.apvts, "Peak Freq", feedbackDelaySlider),
@@ -540,13 +540,13 @@ distortionBypassButtonAttachment(audioProcessor.apvts, "Distortion Bypassed", di
     highCutSlopeSlider.labels.add({1.f, "48"});
     highCutSlopeSlider.nameLabels.add({0.f, "Slope"});
     
-    distortionAmountSlider.labels.add({0.f, "0dB"});
-    distortionAmountSlider.labels.add({1.f, "24dB"});
-    distortionAmountSlider.nameLabels.add({0.f, "Amount"});
+    distortionPreGainSlider.labels.add({0.f, "0dB"});
+    distortionPreGainSlider.labels.add({1.f, "48dB"});
+    distortionPreGainSlider.nameLabels.add({0.f, "Amount"});
     
-    distortionGainSlider.labels.add({0.f, "-24dB"});
-    distortionGainSlider.labels.add({1.f, "24dB"});
-    distortionGainSlider.nameLabels.add({0.f, "Gain"});
+    distortionPostGainSlider.labels.add({0.f, "-48dB"});
+    distortionPostGainSlider.labels.add({1.f, "48dB"});
+    distortionPostGainSlider.nameLabels.add({0.f, "Post Gain"});
     
 //    mixDelaySlider.labels.add({0.f, "12"});
 //    mixDelaySlider.labels.add({1.f, "48"});
@@ -599,8 +599,8 @@ distortionBypassButtonAttachment(audioProcessor.apvts, "Distortion Bypassed", di
         {
             auto bypassed = comp->distortionBypassButton.getToggleState();
             
-            comp->distortionAmountSlider.setEnabled( !bypassed );
-            comp->distortionGainSlider.setEnabled( !bypassed );
+            comp->distortionPreGainSlider.setEnabled( !bypassed );
+            comp->distortionPostGainSlider.setEnabled( !bypassed );
         }
     };
     
@@ -667,8 +667,8 @@ void FilterPedalAudioProcessorEditor::resized()
     highCutSlopeSlider.setBounds(highCutArea);
     
     distortionBypassButton.setBounds(saturationBounds.removeFromTop(25));
-    distortionAmountSlider.setBounds(saturationBounds.removeFromTop(saturationBounds.getHeight() * 0.5));
-    distortionGainSlider.setBounds(saturationBounds);
+    distortionPreGainSlider.setBounds(saturationBounds.removeFromTop(saturationBounds.getHeight() * 0.5));
+    distortionPostGainSlider.setBounds(saturationBounds);
     
 //    delayBypassButton.setBounds(delayBounds.removeFromTop(25));
 //    mixDelaySlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * 0.33));
@@ -684,8 +684,8 @@ std::vector<juce::Component*> FilterPedalAudioProcessorEditor::getComps()
         &lowCutSlopeSlider,
         &highCutFreqSlider,
         &highCutSlopeSlider,
-        &distortionAmountSlider,
-        &distortionGainSlider,
+        &distortionPreGainSlider,
+        &distortionPostGainSlider,
         &responseCurveComponent,
 //        &mixDelaySlider,
 //        &amountDelaySlider,

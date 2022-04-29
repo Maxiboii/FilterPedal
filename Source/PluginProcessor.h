@@ -74,7 +74,7 @@ struct ChainSettings
     
     Slope lowCutSlope { Slope::Slope_12 }, highCutSlope { Slope::Slope_12 };
     
-    float distortionAmount { 0 }, distortionGainInDecibels { 0 };
+    float distortionPreGainInDecibels { 0 }, distortionPostGainInDecibels { 0 };
     
     bool lowCutBypassed { false }, highCutBypassed { false }, distortionBypassed { false };
 };
@@ -150,8 +150,8 @@ void updateDistortionGain(ChainType& chain, SettingsType chainSettings)
     chain.template setBypassed<1>(true);
     chain.template setBypassed<2>(true);
     
-    chain.template get<0>().setGainDecibels(chainSettings.distortionAmount);
-    chain.template get<2>().setGainDecibels(chainSettings.distortionGainInDecibels);
+    chain.template get<0>().setGainDecibels(chainSettings.distortionPreGainInDecibels);
+    chain.template get<2>().setGainDecibels(chainSettings.distortionPostGainInDecibels);
     
     chain.template setBypassed<0>(false);
     chain.template setBypassed<1>(false);

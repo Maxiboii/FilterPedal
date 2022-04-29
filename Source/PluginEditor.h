@@ -116,8 +116,8 @@ private:
                            lowCutSlopeSlider,
                            highCutFreqSlider,
                            highCutSlopeSlider,
-                           distortionAmountSlider,
-    distortionGainSlider;
+                           distortionPreGainSlider,
+    distortionPostGainSlider;
 //                           mixDelaySlider,
 //                           amountDelaySlider,
 //                           feedbackDelaySlider;
@@ -130,9 +130,9 @@ private:
     Attachment lowCutFreqSliderAttachment,
                lowCutSlopeSliderAttachment,
                highCutFreqSliderAttachment,
-    highCutSlopeSliderAttachment,
-               distortionAmountSliderAttachment,
-    distortionGainSliderAttachment;
+               highCutSlopeSliderAttachment,
+               distortionPreGainSliderAttachment,
+    distortionPostGainSliderAttachment;
 //               mixDelaySliderAttachment,
 //               amountDelaySliderAttachment,
 //               feedbackDelaySliderAttachment;
