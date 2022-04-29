@@ -107,7 +107,7 @@ void FilterPedalAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     leftChain.prepare(spec);
     rightChain.prepare(spec);
     
-    updateFilters();
+    updateComponents();
 }
 
 void FilterPedalAudioProcessor::releaseResources()
@@ -157,7 +157,7 @@ void FilterPedalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-    updateFilters();
+    updateComponents();
 
     juce::dsp::AudioBlock<float> block(buffer);
 
@@ -203,7 +203,7 @@ void FilterPedalAudioProcessor::setStateInformation (const void* data, int sizeI
     if( tree.isValid() )
     {
         apvts.replaceState(tree);
-        updateFilters();
+        updateComponents();
     }
 }
 
@@ -272,15 +272,34 @@ void FilterPedalAudioProcessor::updateDistortion(const ChainSettings &chainSetti
     updateDistortionGain(rightDistortion, chainSettings);
 }
 
-void FilterPedalAudioProcessor::updateFilters()
+void FilterPedalAudioProcessor::updateDelay(const ChainSettings &chainSettings)
 {
+    auto& leftDelay = leftChain.get<ChainPositions::DistortedDelay>();
+    auto& rightDelay = rightChain.get<ChainPositions::DistortedDelay>();
     
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    leftChain.setBypassed<ChainPositions::DistortedDelay>(chainSettings.delayBypassed);
+    rightChain.setBypassed<ChainPositions::DistortedDelay>(chainSettings.delayBypassed);
+    
+    if (chainSettings.delayBypassed == 1)
+    {
+        muteDelay(leftDelay, chainSettings);
+        muteDelay(rightDelay, chainSettings);
+    }
+    else
+    {
+        updateDelayValues(leftDelay, chainSettings);
+        updateDelayValues(rightDelay, chainSettings);
+    }
+}
+
+void FilterPedalAudioProcessor::updateComponents()
+{
     auto chainSettings = getChainSettings(apvts);
     
     updateLowCutFilters(chainSettings);
     updateHighCutFilters(chainSettings);
     updateDistortion(chainSettings);
+    updateDelay(chainSettings);
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::createParameterLayout()
@@ -309,7 +328,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Amount",
                                                            "Delay Amount",
-                                                           juce::NormalisableRange<float>(-48.f, 48.f, 0.5f, 1.f),
+                                                           juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f),
                                                            0.f));
 
     

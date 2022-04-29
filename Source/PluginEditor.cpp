@@ -519,7 +519,7 @@ amountDelaySliderAttachment(audioProcessor.apvts, "Delay Amount", amountDelaySli
 lowcutBypassButtonAttachment(audioProcessor.apvts, "LowCut Bypassed", lowcutBypassButton),
 highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutBypassButton),
 distortionBypassButtonAttachment(audioProcessor.apvts, "Distortion Bypassed", distortionBypassButton),
-delayBypassButtonAttachment(audioProcessor.apvts, "Delay Bypassed", distortionBypassButton)
+delayBypassButtonAttachment(audioProcessor.apvts, "Delay Bypassed", delayBypassButton)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -552,9 +552,9 @@ delayBypassButtonAttachment(audioProcessor.apvts, "Delay Bypassed", distortionBy
 //    mixDelaySlider.labels.add({1.f, "48"});
 //    mixDelaySlider.nameLabels.add({0.f, "Mix"});
 
-    amountDelaySlider.labels.add({0.f, "12"});
-    amountDelaySlider.labels.add({1.f, "48"});
-    amountDelaySlider.nameLabels.add({0.f, "Amount"});
+    amountDelaySlider.labels.add({0.f, "0"});
+    amountDelaySlider.labels.add({1.f, "100"});
+    amountDelaySlider.nameLabels.add({0.f, "Dry/Wet"});
 //
 //    feedbackDelaySlider.labels.add({0.f, "12"});
 //    feedbackDelaySlider.labels.add({1.f, "48"});

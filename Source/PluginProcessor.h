@@ -43,7 +43,9 @@ using Gain = juce::dsp::Gain<float>;
 
 using DistortionChain = juce::dsp::ProcessorChain<Gain, Distortion<float>, Gain>;
 
-using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, DistortionChain, Delay<float>>;
+using DelayChain = juce::dsp::ProcessorChain<Delay<float>>;
+
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, DistortionChain, DelayChain>;
 
 enum ChainPositions
 {
@@ -111,6 +113,26 @@ void updateDistortionGain(ChainType& chain, SettingsType chainSettings)
     chain.template setBypassed<0>(false);
     chain.template setBypassed<1>(false);
     chain.template setBypassed<2>(false);
+}
+
+template<typename ChainType, typename SettingsType>
+void updateDelayValues(ChainType& chain, SettingsType chainSettings)
+{
+    chain.template setBypassed<0>(true);
+    
+    chain.template get<0>().setWetLevel(chainSettings.delayAmount);
+    
+    chain.template setBypassed<0>(false);
+}
+
+template<typename ChainType, typename SettingsType>
+void muteDelay(ChainType& chain, SettingsType chainSettings)
+{
+    chain.template setBypassed<0>(true);
+
+    chain.template get<0>().setWetLevel(0);
+    
+    chain.template setBypassed<0>(false);
 }
 
 inline auto makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate )
@@ -181,10 +203,10 @@ private:
     void updateLowCutFilters(const ChainSettings& chainSettings);
     void updateHighCutFilters(const ChainSettings& chainSettings);
     void updateDistortion(const ChainSettings& chainSettings);
+    void updateDelay(const ChainSettings& chainSettings);
     
-    void updateFilters();
+    void updateComponents();
     
-    juce::dsp::Oscillator<float> osc;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterPedalAudioProcessor)
 };
