@@ -18,18 +18,10 @@ private:
     //==============================================================================
     enum
     {
-        filterIndex,
-        preGainIndex,
         waveshaperIndex,
-        postGainIndex
     };
-
-    using Filter = juce::dsp::IIR::Filter<Type>;
-    using FilterCoefs = juce::dsp::IIR::Coefficients<Type>;
-    using ProcessorDuplicator = juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>;
-    using Gain = juce::dsp::Gain<Type>;
     using WaveShaper = juce::dsp::WaveShaper<Type>;
-    using ProcessorChain = juce::dsp::ProcessorChain<ProcessorDuplicator, Gain, WaveShaper, Gain>;
+    using ProcessorChain = juce::dsp::ProcessorChain<WaveShaper>;
 
     std::unique_ptr<ProcessorChain> processorChain;
     
@@ -37,7 +29,6 @@ public:
     //==============================================================================
     Distortion()
     {
-        
         processorChain = std::make_unique<ProcessorChain>();
         
         auto& waveshaper = processorChain->template get<waveshaperIndex>();
@@ -45,37 +36,11 @@ public:
                                    {
                                        return std::tanh (x);
                                    };
-
-        auto& preGain = processorChain->template get<preGainIndex>();
-        preGain.setGainDecibels (50.0f);
-
-        auto& postGain = processorChain->template get<postGainIndex>();
-        postGain.setGainDecibels (0.0f);
-    }
-    
-    template<typename ChainType, typename ChainSettings>
-    void updateValues (ChainType& chain, ChainSettings settings)
-    {
-        
-        
-        
-//        std::cout << __PRETTY_FUNCTION__ << std::endl;
-//        std::cout << settings.distortionAmount << std::endl;
-//        std::cout << settings.distortionGainInDecibels << std::endl;
-//
-//        auto& preGain = processorChain->template get<preGainIndex>();
-//        preGain.setGainDecibels (settings.distortionAmount);
-//
-//        auto& postGain = processorChain->template get<postGainIndex>();
-//        postGain.setGainDecibels (settings.distortionGainInDecibels);
     }
 
     //==============================================================================
     void prepare (const juce::dsp::ProcessSpec& spec)
     {
-        auto& filter = processorChain->template get<filterIndex>();
-        filter.state = FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, 1000.0f);
-
         processorChain.get()->prepare (spec);
     }
 
@@ -121,20 +86,16 @@ using Filter = juce::dsp::IIR::Filter<float>;
 using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
 
 using Gain = juce::dsp::Gain<float>;
-using WaveShaper = juce::dsp::WaveShaper<float>;
 
-//using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, Distortion<float>>;
-using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, Gain>;
+using DistortionChain = juce::dsp::ProcessorChain<Gain, Distortion<float>, Gain>;
+
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, DistortionChain>;
 
 enum ChainPositions
 {
     LowCut,
     HighCut,
-//    Peak,
-//    Distortion_,
-    PreGain,
-//    WaveshapingDistortion,
-//    PostGain
+    WaveshapingDistortion,
 };
 
 using Coefficients = Filter::CoefficientsPtr;
@@ -182,34 +143,19 @@ void updateCutFilter(ChainType& chain,
     }
 }
 
-template<typename ChainType, typename ChainSettings>
-void updatePreGainHeader(ChainType& chain, ChainSettings settings)
+template<typename ChainType, typename SettingsType>
+void updateDistortionGain(ChainType& chain, SettingsType chainSettings)
 {
-    chain.setGainDecibels(settings.distortionAmount);
-}
-
-template<typename ChainType, typename ChainSettings>
-void updateWaveshapingDistortion (ChainType& chain, ChainSettings settings)
-{
+    chain.template setBypassed<0>(true);
+    chain.template setBypassed<1>(true);
+    chain.template setBypassed<2>(true);
     
+    chain.template get<0>().setGainDecibels(chainSettings.distortionAmount);
+    chain.template get<2>().setGainDecibels(chainSettings.distortionGainInDecibels);
     
-    
-//    std::cout << __PRETTY_FUNCTION__ << std::endl;
-//    std::cout << settings.distortionAmount << std::endl;
-//    std::cout << settings.distortionGainInDecibels << std::endl;
-    
-//    chain.template setBypassed<PreGain>(true);
-    
-//    *chain.template get<ChainPositions::PreGain>() = *settings.distortionAmount;
-//    chain.template setBypassed<PreGain>(false);
-//
-//    update<>(chain, coefficients);
-//
-//    auto& preGain = chain->template get<preGainIndex>();
-//    preGain.setGainDecibels (settings.distortionAmount);
-//
-//    auto& postGain = chain->template get<postGainIndex>();
-//    postGain.setGainDecibels (settings.distortionGainInDecibels);
+    chain.template setBypassed<0>(false);
+    chain.template setBypassed<1>(false);
+    chain.template setBypassed<2>(false);
 }
 
 inline auto makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate )
@@ -282,9 +228,6 @@ private:
     void updateLowCutFilters(const ChainSettings& chainSettings);
     void updateHighCutFilters(const ChainSettings& chainSettings);
     void updateDistortion(const ChainSettings& chainSettings);
-//    void updateDistortion__ (const ChainSettings& chainSettings);
-    
-    void updatePreGain(const ChainSettings& chainSettings);
     
     void updateFilters();
     
