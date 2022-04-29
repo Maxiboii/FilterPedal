@@ -237,23 +237,51 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 void FilterPedalAudioProcessor::updateDistortion(const ChainSettings &chainSettings)
 {
     
-    auto& leftDistortion = leftChain.get<ChainPositions::Distortion_>();
-
-//    std::cout << __PRETTY_FUNCTION__ << std::endl;
-//    std::cout << chainSettings.distortionAmount << std::endl;
-//    std::cout << chainSettings.distortionGainInDecibels << std::endl;
-    leftChain.setBypassed<ChainPositions::Distortion_>(chainSettings.distortionBypassed);
-    rightChain.setBypassed<ChainPositions::Distortion_>(chainSettings.distortionBypassed);
-
-    distortion.get()->updateValues(leftDistortion, chainSettings);
-//    leftChain.updateValues<ChainPositions::Distortion_>(chainSettings.distortionAmount);
-//    updateCoefficients(leftChain.get<ChainPositions::Distortion_>().coefficients, peakCoefficients);
-//    updateCoefficients(rightChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+//    auto& leftDistortion = leftChain.get<ChainPositions::Distortion_>();
+//
+////    std::cout << __PRETTY_FUNCTION__ << std::endl;
+////    std::cout << chainSettings.distortionAmount << std::endl;
+////    std::cout << chainSettings.distortionGainInDecibels << std::endl;
+//    leftChain.setBypassed<ChainPositions::Distortion_>(chainSettings.distortionBypassed);
+//    rightChain.setBypassed<ChainPositions::Distortion_>(chainSettings.distortionBypassed);
+//
+//    distortion.get()->updateValues(leftDistortion, chainSettings);
+////    leftChain.updateValues<ChainPositions::Distortion_>(chainSettings.distortionAmount);
+////    updateCoefficients(leftChain.get<ChainPositions::Distortion_>().coefficients, peakCoefficients);
+////    updateCoefficients(rightChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
 }
 
 void updateCoefficients(Coefficients &old, const Coefficients &replacements)
 {
     *old = *replacements;
+}
+
+//void FilterPedalAudioProcessor::updateDistortion__ (const ChainSettings &chainSettings)
+//{
+////    std::cout << __PRETTY_FUNCTION__ << std::endl;
+////    std::cout << chainSettings.distortionAmount << std::endl;
+////    std::cout << chainSettings.distortionGainInDecibels << std::endl;
+//
+//    auto& leftDistortion = leftChain.get<ChainPositions::WaveshapingDistortion>();
+//
+//    leftChain.setBypassed<ChainPositions::WaveshapingDistortion>(chainSettings.distortionBypassed);
+//
+//    updateWaveshapingDistortion(leftDistortion, chainSettings);
+//
+////    auto& preGain = processorChain->template get<preGainIndex>();
+////    preGain.setGainDecibels (settings.distortionAmount);
+////
+////    auto& postGain = processorChain->template get<postGainIndex>();
+////    postGain.setGainDecibels (settings.distortionGainInDecibels);
+//}
+
+void FilterPedalAudioProcessor::updatePreGain(const ChainSettings &chainSettings)
+{
+    auto& leftPreGain = leftChain.get<ChainPositions::PreGain>();
+    auto& rightPreGain = rightChain.get<ChainPositions::PreGain>();
+
+    updatePreGainHeader(leftPreGain, chainSettings);
+    updatePreGainHeader(rightPreGain, chainSettings);
 }
 
 void FilterPedalAudioProcessor::updateLowCutFilters(const ChainSettings &chainSettings)
@@ -293,6 +321,8 @@ void FilterPedalAudioProcessor::updateFilters()
     updateLowCutFilters(chainSettings);
     updateHighCutFilters(chainSettings);
     updateDistortion(chainSettings);
+    
+    updatePreGain(chainSettings);
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::createParameterLayout()
