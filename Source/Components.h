@@ -17,6 +17,9 @@ class Distortion
 {
 private:
     //==============================================================================
+    Type preGainAmount { Type (0) };
+    Type postGainAmount { Type (0) };
+    
     enum
     {
         preGainIndex,
@@ -57,20 +60,17 @@ public:
     }
     
     //==============================================================================
-    template <typename SampleType, typename AmountType>
-    SampleType processSample (const SampleType& sample, const AmountType& preGainAmount, const AmountType& postGainAmount) noexcept
+    template <typename SampleType>
+    SampleType processSample (const SampleType& sample) noexcept
     {
         auto& preGain = processorChain->template get<preGainIndex>();
         auto& waveshaper = processorChain->template get<waveshaperIndex>();
         auto& postGain = processorChain->template get<postGainIndex>();
         
-        preGain.setGainDecibels(preGainAmount);
-        postGain.setGainDecibels(postGainAmount);
-        
         auto processedSample = preGain.processSample (sample);
         processedSample = waveshaper.processSample (processedSample);
         processedSample = postGain.processSample (processedSample);
-        
+//
         return processedSample;
     }
 
@@ -79,6 +79,23 @@ public:
     {
         processorChain.reset();
     }
+    
+    //==============================================================================
+    template <typename AmountType>
+    void setPreGain (const AmountType& amount) noexcept
+    {
+        auto& preGain = processorChain->template get<preGainIndex>();
+        preGain.setGainDecibels(amount);
+    }
+    
+    //==============================================================================
+    template <typename AmountType>
+    void setPostGain (const AmountType& amount) noexcept
+    {
+        auto& postGain = processorChain->template get<postGainIndex>();
+        postGain.setGainDecibels(amount);
+    }
+    
 
 
 };
@@ -145,10 +162,6 @@ public:
     Delay()
     {
         setMaxDelayTime (3.1f);
-//        setDelayTime (0, 0.7f);
-//        setDelayTime (1, 0.5f);
-//        setWetLevel (0.8f);
-//        setFeedback (0.5f);
     }
 
     //==============================================================================
@@ -287,6 +300,9 @@ public:
             auto& highCutFilter = highCutFilters[ch];
             auto& distortion = distortions[ch];
             
+            distortion.setPreGain(distortionPreGainAmount);
+            distortion.setPostGain(distortionPostGainAmount);
+            
             lowCutCoefficients = juce::dsp::IIR::Coefficients<Type>::makeFirstOrderHighPass (sampleRate, lowCutFreq);
             highCutCoefficients = juce::dsp::IIR::Coefficients<Type>::makeFirstOrderLowPass (sampleRate, highCutFreq);
             lowCutFilter.coefficients = lowCutCoefficients;
@@ -302,7 +318,7 @@ public:
                 
                 auto drySample = inputSample * dryLevel;
                 auto wetSample = wetLevel * delayedSample;
-                auto distortedWetSample = distortion.processSample(wetSample, distortionPreGainAmount, distortionPostGainAmount);
+                auto distortedWetSample = distortion.processSample(wetSample);
                 auto outputSample = drySample + distortedWetSample;
                 output[i] = outputSample;
             }

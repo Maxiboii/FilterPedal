@@ -39,19 +39,17 @@ using Filter = juce::dsp::IIR::Filter<float>;
 
 using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
 
-using Gain = juce::dsp::Gain<float>;
-
-using DistortionChain = juce::dsp::ProcessorChain<Gain, Distortion<float>, Gain>;
-
 using DelayChain = juce::dsp::ProcessorChain<Delay<float>>;
 
-using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, DelayChain>;
+using WaveShaper = juce::dsp::ProcessorChain<Distortion<float>>;
+
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, WaveShaper, DelayChain>;
 
 enum ChainPositions
 {
     LowCut,
     HighCut,
-//    WaveshapingDistortion,
+    WaveshapingDistortion,
     DistortedDelay
 };
 
@@ -106,9 +104,9 @@ void updateDistortionGain(ChainType& chain, SettingsType chainSettings)
     chain.template setBypassed<0>(true);
     chain.template setBypassed<1>(true);
     chain.template setBypassed<2>(true);
-    
-    chain.template get<0>().setGainDecibels(chainSettings.distortionPreGainInDecibels);
-    chain.template get<2>().setGainDecibels(chainSettings.distortionPostGainInDecibels);
+
+    chain.template get<0>().setPreGain(chainSettings.distortionPreGainInDecibels);
+    chain.template get<0>().setPostGain(chainSettings.distortionPostGainInDecibels);
     
     chain.template setBypassed<0>(false);
     chain.template setBypassed<1>(false);

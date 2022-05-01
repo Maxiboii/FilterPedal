@@ -723,8 +723,8 @@ void FilterPedalAudioProcessorEditor::resized()
     //    delayTimeLeftSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
     //    delayTimeRightSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
     
-    delayHighCutSlider.setBounds(delayBounds2.removeFromTop(70));
     delayLowCutSlider.setBounds(delayBounds2.removeFromTop(70));
+    delayHighCutSlider.setBounds(delayBounds2.removeFromTop(70));
     
     delayTimeLeftSlider.setBounds(delayBounds3.removeFromTop(70));
     delayTimeRightSlider.setBounds(delayBounds3.removeFromTop(70));
