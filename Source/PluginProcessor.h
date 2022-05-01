@@ -45,13 +45,13 @@ using DistortionChain = juce::dsp::ProcessorChain<Gain, Distortion<float>, Gain>
 
 using DelayChain = juce::dsp::ProcessorChain<Delay<float>>;
 
-using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, DistortionChain, DelayChain>;
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, DelayChain>;
 
 enum ChainPositions
 {
     LowCut,
     HighCut,
-    WaveshapingDistortion,
+//    WaveshapingDistortion,
     DistortedDelay
 };
 

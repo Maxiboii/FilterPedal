@@ -12,6 +12,67 @@
 #endif /* Components_h */
 
 
+template <typename Type>
+class Distortion
+{
+private:
+    //==============================================================================
+    enum
+    {
+        preGainIndex,
+        waveshaperIndex,
+    };
+    using WaveShaper = juce::dsp::WaveShaper<Type>;
+    using ProcessorChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, WaveShaper>;
+
+    std::unique_ptr<ProcessorChain> processorChain;
+    
+public:
+    //==============================================================================
+    Distortion()
+    {
+        processorChain = std::make_unique<ProcessorChain>();
+        
+        auto& waveshaper = processorChain->template get<waveshaperIndex>();
+        auto& preGain = processorChain->template get<preGainIndex>();
+        
+        waveshaper.functionToUse = [] (Type x)
+                                   {
+                                       return std::tanh (x);
+                                   };
+        preGain.setGainDecibels(20.f);
+    }
+
+    //==============================================================================
+    void prepare (const juce::dsp::ProcessSpec& spec)
+    {
+        processorChain.get()->prepare (spec);
+    }
+
+    //==============================================================================
+    template <typename ProcessContext>
+    void process (const ProcessContext& context) noexcept
+    {
+        processorChain.get()->process (context);
+    }
+    
+    //==============================================================================
+    template <typename SampleType>
+    SampleType processSample (const SampleType& sample) noexcept
+    {
+        return processorChain->template get<preGainIndex>().processSample (sample);
+        return processorChain->template get<waveshaperIndex>().processSample (sample);
+    }
+
+    //==============================================================================
+    void reset() noexcept
+    {
+        processorChain.reset();
+    }
+
+
+};
+
 //==============================================================================
 template <typename Type>
 class DelayLine
@@ -183,6 +244,7 @@ public:
             auto& dline = delayLines[ch];
             auto delayTime = delayTimesSample[ch];
             auto& filter = filters[ch];
+            auto& distortion = distortions[ch];
             
             filterCoefs = juce::dsp::IIR::Coefficients<Type>::makeFirstOrderHighPass (sampleRate, filterFreq); // [2]
             filter.coefficients = filterCoefs;
@@ -196,7 +258,8 @@ public:
                 
                 auto drySample = inputSample * dryLevel;
                 auto wetSample = wetLevel * delayedSample;
-                auto outputSample = drySample + wetSample;
+                auto distortedWetSample = distortion.processSample(wetSample);
+                auto outputSample = drySample + distortedWetSample;
                 output[i] = outputSample;
             }
         }
@@ -214,6 +277,9 @@ private:
 
     std::array<juce::dsp::IIR::Filter<Type>, maxNumChannels> filters;
     typename juce::dsp::IIR::Coefficients<Type>::Ptr filterCoefs;
+    
+    std::array<Distortion<float>, maxNumChannels> distortions;
+//    typename juce::dsp::WaveShaper< FloatType, Function >::Ptr waveshaper_function;
 
     Type sampleRate   { Type (44.1e3) };
     Type maxDelayTime { Type (3) };
@@ -233,53 +299,4 @@ private:
         for (size_t ch = 0; ch < maxNumChannels; ++ch)
             delayTimesSample[ch] = (size_t) juce::roundToInt (delayTimes[ch] * sampleRate);
     }
-};
-
-template <typename Type>
-class Distortion
-{
-private:
-    //==============================================================================
-    enum
-    {
-        waveshaperIndex,
-    };
-    using WaveShaper = juce::dsp::WaveShaper<Type>;
-    using ProcessorChain = juce::dsp::ProcessorChain<WaveShaper>;
-
-    std::unique_ptr<ProcessorChain> processorChain;
-    
-public:
-    //==============================================================================
-    Distortion()
-    {
-        processorChain = std::make_unique<ProcessorChain>();
-        
-        auto& waveshaper = processorChain->template get<waveshaperIndex>();
-        waveshaper.functionToUse = [] (Type x)
-                                   {
-                                       return std::tanh (x);
-                                   };
-    }
-
-    //==============================================================================
-    void prepare (const juce::dsp::ProcessSpec& spec)
-    {
-        processorChain.get()->prepare (spec);
-    }
-
-    //==============================================================================
-    template <typename ProcessContext>
-    void process (const ProcessContext& context) noexcept
-    {
-        processorChain.get()->process (context);
-    }
-
-    //==============================================================================
-    void reset() noexcept
-    {
-        processorChain.reset();
-    }
-
-
 };

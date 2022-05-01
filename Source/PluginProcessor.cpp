@@ -265,17 +265,17 @@ void FilterPedalAudioProcessor::updateHighCutFilters(const ChainSettings &chainS
     updateCutFilter(rightHighCut, highCutCoefficients, chainSettings.highCutSlope);
 }
 
-void FilterPedalAudioProcessor::updateDistortion(const ChainSettings &chainSettings)
-{
-    auto& leftDistortion = leftChain.get<ChainPositions::WaveshapingDistortion>();
-    auto& rightDistortion = rightChain.get<ChainPositions::WaveshapingDistortion>();
-    
-    leftChain.setBypassed<ChainPositions::WaveshapingDistortion>(chainSettings.distortionBypassed);
-    rightChain.setBypassed<ChainPositions::WaveshapingDistortion>(chainSettings.distortionBypassed);
-
-    updateDistortionGain(leftDistortion, chainSettings);
-    updateDistortionGain(rightDistortion, chainSettings);
-}
+//void FilterPedalAudioProcessor::updateDistortion(const ChainSettings &chainSettings)
+//{
+//    auto& leftDistortion = leftChain.get<ChainPositions::WaveshapingDistortion>();
+//    auto& rightDistortion = rightChain.get<ChainPositions::WaveshapingDistortion>();
+//
+//    leftChain.setBypassed<ChainPositions::WaveshapingDistortion>(chainSettings.distortionBypassed);
+//    rightChain.setBypassed<ChainPositions::WaveshapingDistortion>(chainSettings.distortionBypassed);
+//
+//    updateDistortionGain(leftDistortion, chainSettings);
+//    updateDistortionGain(rightDistortion, chainSettings);
+//}
 
 void FilterPedalAudioProcessor::updateDelay(const ChainSettings &chainSettings)
 {
@@ -303,7 +303,7 @@ void FilterPedalAudioProcessor::updateComponents()
     
     updateLowCutFilters(chainSettings);
     updateHighCutFilters(chainSettings);
-    updateDistortion(chainSettings);
+//    updateDistortion(chainSettings);
     updateDelay(chainSettings);
 }
 
