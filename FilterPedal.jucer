@@ -5,6 +5,7 @@
               cppLanguageStandard="17">
   <MAINGROUP id="ZmBvrl" name="FilterPedal">
     <GROUP id="{49B3196A-8C76-37CF-BB07-1E0602F30A3B}" name="Source">
+      <FILE id="umixfm" name="Components.h" compile="0" resource="0" file="Source/Components.h"/>
       <FILE id="S8Mk2A" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="nyRTl5" name="PluginProcessor.h" compile="0" resource="0"
