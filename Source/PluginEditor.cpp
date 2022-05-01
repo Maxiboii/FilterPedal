@@ -559,9 +559,9 @@ delayBypassButtonAttachment(audioProcessor.apvts, "Delay Bypassed", delayBypassB
     distortionPostGainSlider.labels.add({1.f, "48dB"});
     distortionPostGainSlider.nameLabels.add({0.f, "Post Gain"});
     
-    delayWetSlider.labels.add({0.f, "0"});
-    delayWetSlider.labels.add({1.f, "100"});
-    delayWetSlider.nameLabels.add({0.f, "Dry"});
+    delayDrySlider.labels.add({0.f, "0"});
+    delayDrySlider.labels.add({1.f, "100"});
+    delayDrySlider.nameLabels.add({0.f, "Dry"});
 
     delayWetSlider.labels.add({0.f, "0"});
     delayWetSlider.labels.add({1.f, "100"});
@@ -714,22 +714,22 @@ void FilterPedalAudioProcessorEditor::resized()
     distortionPostGainSlider.setBounds(saturationBounds);
     
     delayBypassButton.setBounds(delayBounds.removeFromTop(25));
-    delayDrySlider.setBounds(delayBounds.removeFromTop(70));
-    delayWetSlider.setBounds(delayBounds.removeFromTop(70));
-    delayFeedbackSlider.setBounds(delayBounds.removeFromTop(70));
+    delayDrySlider.setBounds(delayBounds.removeFromTop(90));
+    delayWetSlider.setBounds(delayBounds.removeFromTop(90));
+    delayFeedbackSlider.setBounds(delayBounds.removeFromTop(90));
     
     //    delayMixSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
     //    delayFeedbackSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
     //    delayTimeLeftSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
     //    delayTimeRightSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
     
-    delayLowCutSlider.setBounds(delayBounds2.removeFromTop(70));
-    delayHighCutSlider.setBounds(delayBounds2.removeFromTop(70));
+    delayLowCutSlider.setBounds(delayBounds2.removeFromTop(80));
+    delayHighCutSlider.setBounds(delayBounds2.removeFromTop(80));
     
-    delayTimeLeftSlider.setBounds(delayBounds3.removeFromTop(70));
-    delayTimeRightSlider.setBounds(delayBounds3.removeFromTop(70));
-    delayDistortionPreGainSlider.setBounds(delayBounds3.removeFromTop(70));
-    delayDistortionPostGainSlider.setBounds(delayBounds3.removeFromTop(70));
+    delayTimeLeftSlider.setBounds(delayBounds3.removeFromTop(90));
+    delayTimeRightSlider.setBounds(delayBounds3.removeFromTop(90));
+    delayDistortionPreGainSlider.setBounds(delayBounds3.removeFromTop(90));
+    delayDistortionPostGainSlider.setBounds(delayBounds3.removeFromTop(90));
 }
 
 std::vector<juce::Component*> FilterPedalAudioProcessorEditor::getComps()

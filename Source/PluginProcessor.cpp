@@ -346,7 +346,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Feedback",
                                                            "Delay Feedback",
-                                                           juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f),
+                                                           juce::NormalisableRange<float>(0.f, 0.99f, 0.01f, 1.f),
                                                            0.3f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Time Left",
@@ -366,8 +366,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Delay HighCut",
                                                            "Delay HighCut",
-                                                           juce::NormalisableRange<float>(200.f, 5000.f, 1.0f, 1.f),
-                                                           3000.f));
+                                                           juce::NormalisableRange<float>(3000.f, 10000.f, 1.0f, 1.f),
+                                                           5000.f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Distortion",
                                                            "Delay Distortion",

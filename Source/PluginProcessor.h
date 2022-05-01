@@ -28,7 +28,7 @@ struct ChainSettings
     
     float distortionPreGainInDecibels { 0 }, distortionPostGainInDecibels { 0 };
     
-    float delayDry { 1 }, delayWet { 0 }, delayFeedback { 0 }, delayTimeLeft { 0 }, delayTimeRight { 0 }, delayLowCutFreq { 500 }, delayHighCutFreq { 3000 }, delayDistortionPreGain { 0 }, delayDistortionPostGain { 0 };
+    float delayDry { 1 }, delayWet { 0 }, delayFeedback { 0 }, delayTimeLeft { 0 }, delayTimeRight { 0 }, delayLowCutFreq { 500 }, delayHighCutFreq { 5000 }, delayDistortionPreGain { 0 }, delayDistortionPostGain { 0 };
     
     bool lowCutBypassed { false }, highCutBypassed { false }, distortionBypassed { false }, delayBypassed { false };
 };
