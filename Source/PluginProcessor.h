@@ -28,7 +28,7 @@ struct ChainSettings
     
     float distortionPreGainInDecibels { 0 }, distortionPostGainInDecibels { 0 };
     
-    float delayAmount { 0 };
+    float delayDry { 1 }, delayWet { 0 }, delayFeedback { 0 }, delayTimeLeft { 0 }, delayTimeRight { 0 };
     
     bool lowCutBypassed { false }, highCutBypassed { false }, distortionBypassed { false }, delayBypassed { false };
 };
@@ -115,12 +115,29 @@ void updateDistortionGain(ChainType& chain, SettingsType chainSettings)
     chain.template setBypassed<2>(false);
 }
 
-template<typename ChainType, typename SettingsType>
-void updateDelayValues(ChainType& chain, SettingsType chainSettings)
+template<typename ChainType, typename SettingsType, typename ChannelNumber>
+void updateDelayValues(ChainType& chain, SettingsType chainSettings, ChannelNumber channelNumber)
 {
     chain.template setBypassed<0>(true);
     
-    chain.template get<0>().setWetLevel(chainSettings.delayAmount);
+    chain.template get<0>().setDryLevel(chainSettings.delayDry);
+    chain.template get<0>().setWetLevel(chainSettings.delayWet);
+    chain.template get<0>().setFeedback(chainSettings.delayFeedback);
+
+    switch( channelNumber )
+    {
+        case 0:
+        {
+            chain.template get<0>().setDelayTime(0, chainSettings.delayTimeLeft);
+            break;
+        }
+        case 1:
+        {
+            chain.template get<0>().setDelayTime(0, chainSettings.delayTimeRight);
+            break;
+
+        }
+    }
     
     chain.template setBypassed<0>(false);
 }
@@ -130,6 +147,7 @@ void muteDelay(ChainType& chain, SettingsType chainSettings)
 {
     chain.template setBypassed<0>(true);
 
+    chain.template get<0>().setDryLevel(1);
     chain.template get<0>().setWetLevel(0);
     
     chain.template setBypassed<0>(false);

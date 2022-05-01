@@ -117,10 +117,12 @@ private:
                            highCutFreqSlider,
                            highCutSlopeSlider,
                            distortionPreGainSlider,
-    distortionPostGainSlider,
-//                           mixDelaySlider,
-    mixDelaySlider;
-//                           feedbackDelaySlider;
+                           distortionPostGainSlider,
+                           delayDrySlider,
+                           delayWetSlider,
+                           delayFeedbackSlider,
+                           delayTimeLeftSlider,
+                           delayTimeRightSlider;
     
     ResponseCurveComponent responseCurveComponent;
     
@@ -132,10 +134,12 @@ private:
                highCutFreqSliderAttachment,
                highCutSlopeSliderAttachment,
                distortionPreGainSliderAttachment,
-    distortionPostGainSliderAttachment,
-//               mixDelaySliderAttachment,
-    mixDelaySliderAttachment;
-//               feedbackDelaySliderAttachment;
+               distortionPostGainSliderAttachment,
+               delayDrySliderAttachment,
+               delayWetSliderAttachment,
+               delayFeedbackSliderAttachment,
+               delayTimeLeftSliderAttachment,
+               delayTimeRightSliderAttachment;
     
     PowerButton lowcutBypassButton, highcutBypassButton, distortionBypassButton, delayBypassButton;
     

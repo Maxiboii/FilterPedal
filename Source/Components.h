@@ -66,18 +66,18 @@ private:
 };
 
 //==============================================================================
-template <typename Type, size_t maxNumChannels = 2>
+template <typename Type, size_t maxNumChannels = 1>
 class Delay
 {
 public:
     //==============================================================================
     Delay()
     {
-        setMaxDelayTime (2.0f);
-        setDelayTime (0, 0.7f);
-        setDelayTime (1, 0.5f);
+        setMaxDelayTime (3.1f);
+//        setDelayTime (0, 0.7f);
+//        setDelayTime (1, 0.5f);
 //        setWetLevel (0.8f);
-        setFeedback (0.5f);
+//        setFeedback (0.5f);
     }
 
     //==============================================================================
@@ -134,6 +134,13 @@ public:
         jassert (newValue >= Type (0) && newValue <= Type (1));
         wetLevel = newValue;
     }
+    
+    //==============================================================================
+    void setDryLevel (Type newValue) noexcept
+    {
+        jassert (newValue >= Type (0) && newValue <= Type (1));
+        dryLevel = newValue;
+    }
 
     //==============================================================================
     void setDelayTime (size_t channel, Type newValue)
@@ -176,7 +183,10 @@ public:
                 auto inputSample = input[i];
                 auto dlineInputSample = std::tanh (inputSample + feedback * delayedSample);
                 dline.push (dlineInputSample);
-                auto outputSample = inputSample + wetLevel * delayedSample;
+                
+                auto drySample = inputSample * dryLevel;
+                auto wetSample = wetLevel * delayedSample;
+                auto outputSample = drySample + wetSample;
                 output[i] = outputSample;
             }
         }
@@ -187,14 +197,16 @@ private:
     std::array<DelayLine<Type>, maxNumChannels> delayLines;
     std::array<size_t, maxNumChannels> delayTimesSample;
     std::array<Type, maxNumChannels> delayTimes;
+    Type filterFreq { Type (1000) };
     Type feedback { Type (0) };
+    Type dryLevel { Type (0) };
     Type wetLevel { Type (0) };
 
     std::array<juce::dsp::IIR::Filter<Type>, maxNumChannels> filters;
     typename juce::dsp::IIR::Coefficients<Type>::Ptr filterCoefs;
 
     Type sampleRate   { Type (44.1e3) };
-    Type maxDelayTime { Type (2) };
+    Type maxDelayTime { Type (3) };
 
     //==============================================================================
     void updateDelayLineSize()
