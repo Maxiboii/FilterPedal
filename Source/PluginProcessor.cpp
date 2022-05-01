@@ -223,6 +223,9 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.delayTimeLeft = apvts.getRawParameterValue("Delay Time Left")->load();
     settings.delayTimeRight = apvts.getRawParameterValue("Delay Time Right")->load();
     settings.delayLowCutFreq = apvts.getRawParameterValue("Delay LowCut")->load();
+    settings.delayHighCutFreq = apvts.getRawParameterValue("Delay HighCut")->load();
+    settings.delayDistortionPreGain = apvts.getRawParameterValue("Delay Distortion")->load();
+    settings.delayDistortionPostGain = apvts.getRawParameterValue("Delay PostGain")->load();
     
     settings.lowCutBypassed = apvts.getRawParameterValue("LowCut Bypassed")->load() > 0.5f;
     settings.highCutBypassed = apvts.getRawParameterValue("HighCut Bypassed")->load() > 0.5f;
@@ -323,12 +326,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Distortion Amount",
                                                            "Distortion Amount",
-                                                           juce::NormalisableRange<float>(0.f, 48.f, 0.5f, 1.f),
+                                                           juce::NormalisableRange<float>(0.f, 48.f, 0.1f, 1.f),
                                                            0.f));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("Distortion PostGain",
                                                            "Distortion PostGain",
-                                                           juce::NormalisableRange<float>(-48.f, 48.f, 0.5f, 1.f),
+                                                           juce::NormalisableRange<float>(-48.f, 48.f, 0.1f, 1.f),
                                                            0.f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Dry",
@@ -358,8 +361,23 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Delay LowCut",
                                                            "Delay LowCut",
-                                                           juce::NormalisableRange<float>(200.f, 3000.f, 1.0f, 1.f),
-                                                           1000.f));
+                                                           juce::NormalisableRange<float>(200.f, 5000.f, 1.0f, 1.f),
+                                                           500.f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay HighCut",
+                                                           "Delay HighCut",
+                                                           juce::NormalisableRange<float>(200.f, 5000.f, 1.0f, 1.f),
+                                                           3000.f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Distortion",
+                                                           "Delay Distortion",
+                                                           juce::NormalisableRange<float>(0.f, 48.f, 0.1f, 1.f),
+                                                           0.f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay PostGain",
+                                                           "Delay PostGain",
+                                                           juce::NormalisableRange<float>(-48.f, 48.f, 0.1f, 1.f),
+                                                           0.f));
 
     
     juce::StringArray stringArray;

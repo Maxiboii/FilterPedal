@@ -28,7 +28,7 @@ struct ChainSettings
     
     float distortionPreGainInDecibels { 0 }, distortionPostGainInDecibels { 0 };
     
-    float delayDry { 1 }, delayWet { 0 }, delayFeedback { 0 }, delayTimeLeft { 0 }, delayTimeRight { 0 }, delayLowCutFreq { 1000 };
+    float delayDry { 1 }, delayWet { 0 }, delayFeedback { 0 }, delayTimeLeft { 0 }, delayTimeRight { 0 }, delayLowCutFreq { 500 }, delayHighCutFreq { 3000 }, delayDistortionPreGain { 0 }, delayDistortionPostGain { 0 };
     
     bool lowCutBypassed { false }, highCutBypassed { false }, distortionBypassed { false }, delayBypassed { false };
 };
@@ -123,7 +123,12 @@ void updateDelayValues(ChainType& chain, SettingsType chainSettings, ChannelNumb
     chain.template get<0>().setDryLevel(chainSettings.delayDry);
     chain.template get<0>().setWetLevel(chainSettings.delayWet);
     chain.template get<0>().setFeedback(chainSettings.delayFeedback);
-    chain.template get<0>().setFilterFreq(chainSettings.delayLowCutFreq);
+    
+    chain.template get<0>().setLowCutFreq(chainSettings.delayLowCutFreq);
+    chain.template get<0>().setHighCutFreq(chainSettings.delayHighCutFreq);
+
+    chain.template get<0>().setDistortionPreGainAmount(chainSettings.delayDistortionPreGain);
+    chain.template get<0>().setDistortionPostGainAmount(chainSettings.delayDistortionPostGain);
 
     switch( channelNumber )
     {
