@@ -119,7 +119,7 @@ private:
                            distortionPreGainSlider,
     distortionPostGainSlider,
 //                           mixDelaySlider,
-    amountDelaySlider;
+    mixDelaySlider;
 //                           feedbackDelaySlider;
     
     ResponseCurveComponent responseCurveComponent;
@@ -134,7 +134,7 @@ private:
                distortionPreGainSliderAttachment,
     distortionPostGainSliderAttachment,
 //               mixDelaySliderAttachment,
-    amountDelaySliderAttachment;
+    mixDelaySliderAttachment;
 //               feedbackDelaySliderAttachment;
     
     PowerButton lowcutBypassButton, highcutBypassButton, distortionBypassButton, delayBypassButton;

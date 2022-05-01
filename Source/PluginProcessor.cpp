@@ -217,7 +217,7 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.highCutSlope = static_cast<Slope>(apvts.getRawParameterValue("HighCut Slope")->load());
     settings.distortionPreGainInDecibels = apvts.getRawParameterValue("Distortion Amount")->load();
     settings.distortionPostGainInDecibels = apvts.getRawParameterValue("Distortion PostGain")->load();
-    settings.delayAmount = apvts.getRawParameterValue("Delay Amount")->load();
+    settings.delayAmount = apvts.getRawParameterValue("Delay Mix")->load();
     
     settings.lowCutBypassed = apvts.getRawParameterValue("LowCut Bypassed")->load() > 0.5f;
     settings.highCutBypassed = apvts.getRawParameterValue("HighCut Bypassed")->load() > 0.5f;
@@ -326,8 +326,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
                                                            juce::NormalisableRange<float>(-48.f, 48.f, 0.5f, 1.f),
                                                            0.f));
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Amount",
-                                                           "Delay Amount",
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Mix",
+                                                           "Delay Mix",
                                                            juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f),
                                                            0.f));
 
