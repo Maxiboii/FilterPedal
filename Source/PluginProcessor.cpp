@@ -222,6 +222,7 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.delayFeedback = apvts.getRawParameterValue("Delay Feedback")->load();
     settings.delayTimeLeft = apvts.getRawParameterValue("Delay Time Left")->load();
     settings.delayTimeRight = apvts.getRawParameterValue("Delay Time Right")->load();
+    settings.delayLowCutFreq = apvts.getRawParameterValue("Delay LowCut")->load();
     
     settings.lowCutBypassed = apvts.getRawParameterValue("LowCut Bypassed")->load() > 0.5f;
     settings.highCutBypassed = apvts.getRawParameterValue("HighCut Bypassed")->load() > 0.5f;
@@ -354,6 +355,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
                                                            "Delay Time Right",
                                                            juce::NormalisableRange<float>(0.f, 3.f, 0.01f, 1.f),
                                                            0.3f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay LowCut",
+                                                           "Delay LowCut",
+                                                           juce::NormalisableRange<float>(200.f, 3000.f, 1.0f, 1.f),
+                                                           1000.f));
 
     
     juce::StringArray stringArray;

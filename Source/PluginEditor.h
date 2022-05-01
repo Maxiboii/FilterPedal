@@ -122,7 +122,8 @@ private:
                            delayWetSlider,
                            delayFeedbackSlider,
                            delayTimeLeftSlider,
-                           delayTimeRightSlider;
+                           delayTimeRightSlider,
+                           delayLowCutSlider;
     
     ResponseCurveComponent responseCurveComponent;
     
@@ -139,7 +140,8 @@ private:
                delayWetSliderAttachment,
                delayFeedbackSliderAttachment,
                delayTimeLeftSliderAttachment,
-               delayTimeRightSliderAttachment;
+               delayTimeRightSliderAttachment,
+               delayLowCutSliderAttachment;
     
     PowerButton lowcutBypassButton, highcutBypassButton, distortionBypassButton, delayBypassButton;
     

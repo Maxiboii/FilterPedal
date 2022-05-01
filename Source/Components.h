@@ -88,7 +88,7 @@ public:
         updateDelayLineSize();
         updateDelayTime();
 
-        filterCoefs = juce::dsp::IIR::Coefficients<Type>::makeFirstOrderHighPass (sampleRate, Type (1e3)); // [2]
+        filterCoefs = juce::dsp::IIR::Coefficients<Type>::makeFirstOrderHighPass (sampleRate, filterFreq); // [2]
 
         for (auto& f : filters)
         {
@@ -119,6 +119,13 @@ public:
         jassert (newValue > Type (0));
         maxDelayTime = newValue;
         updateDelayLineSize(); // [1]
+    }
+    
+    //==============================================================================
+    void setFilterFreq (Type newValue) noexcept
+    {
+        jassert (newValue >= Type (20) && newValue <= Type (20000));
+        filterFreq = newValue;
     }
 
     //==============================================================================
@@ -176,6 +183,9 @@ public:
             auto& dline = delayLines[ch];
             auto delayTime = delayTimesSample[ch];
             auto& filter = filters[ch];
+            
+            filterCoefs = juce::dsp::IIR::Coefficients<Type>::makeFirstOrderHighPass (sampleRate, filterFreq); // [2]
+            filter.coefficients = filterCoefs;
      
             for (size_t i = 0; i < numSamples; ++i)
             {
