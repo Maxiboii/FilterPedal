@@ -50,6 +50,7 @@ struct RotarySliderWithLabels : juce::Slider
     };
     
     juce::Array<LabelPos> labels;
+    juce::Array<LabelPos> nameLabels;
     
     void paint(juce::Graphics& g) override;
     juce::Rectangle<int> getSliderBounds() const;
@@ -112,9 +113,20 @@ private:
     FilterPedalAudioProcessor& audioProcessor;
     
     RotarySliderWithLabels lowCutFreqSlider,
-                           highCutFreqSlider,
                            lowCutSlopeSlider,
-                           highCutSlopeSlider;
+                           highCutFreqSlider,
+                           highCutSlopeSlider,
+                           distortionPreGainSlider,
+                           distortionPostGainSlider,
+                           delayDrySlider,
+                           delayWetSlider,
+                           delayFeedbackSlider,
+                           delayTimeLeftSlider,
+                           delayTimeRightSlider,
+                           delayLowCutSlider,
+                           delayHighCutSlider,
+                           delayDistortionPreGainSlider,
+                           delayDistortionPostGainSlider;
     
     ResponseCurveComponent responseCurveComponent;
     
@@ -122,15 +134,28 @@ private:
     using Attachment = APVTS::SliderAttachment;
     
     Attachment lowCutFreqSliderAttachment,
-               highCutFreqSliderAttachment,
                lowCutSlopeSliderAttachment,
-               highCutSlopeSliderAttachment;
+               highCutFreqSliderAttachment,
+               highCutSlopeSliderAttachment,
+               distortionPreGainSliderAttachment,
+               distortionPostGainSliderAttachment,
+               delayDrySliderAttachment,
+               delayWetSliderAttachment,
+               delayFeedbackSliderAttachment,
+               delayTimeLeftSliderAttachment,
+               delayTimeRightSliderAttachment,
+               delayLowCutSliderAttachment,
+               delayHighCutSliderAttachment,
+               delayDistortionPreGainSliderAttachment,
+               delayDistortionPostGainSliderAttachment;
     
-    PowerButton lowcutBypassButton, /*peakBypassButton,*/ highcutBypassButton;
+    PowerButton lowcutBypassButton, highcutBypassButton, distortionBypassButton, delayBypassButton;
     
     using ButtonAttachment = APVTS::ButtonAttachment;
     ButtonAttachment lowcutBypassButtonAttachment,
-                     highcutBypassButtonAttachment;
+                     highcutBypassButtonAttachment,
+                     distortionBypassButtonAttachment,
+                     delayBypassButtonAttachment;
     
     std::vector<juce::Component*> getComps();
     

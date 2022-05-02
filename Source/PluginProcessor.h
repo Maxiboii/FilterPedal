@@ -9,6 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "Components.h"
 
 
 enum Slope
@@ -25,7 +26,11 @@ struct ChainSettings
     
     Slope lowCutSlope { Slope::Slope_12 }, highCutSlope { Slope::Slope_12 };
     
-    bool lowCutBypassed { false }, highCutBypassed { false };
+    float distortionPreGainInDecibels { 0 }, distortionPostGainInDecibels { 0 };
+    
+    float delayDry { 1 }, delayWet { 0 }, delayFeedback { 0 }, delayTimeLeft { 0 }, delayTimeRight { 0 }, delayLowCutFreq { 500 }, delayHighCutFreq { 5000 }, delayDistortionPreGain { 0 }, delayDistortionPostGain { 0 };
+    
+    bool lowCutBypassed { false }, highCutBypassed { false }, distortionBypassed { false }, delayBypassed { false };
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
@@ -34,17 +39,24 @@ using Filter = juce::dsp::IIR::Filter<float>;
 
 using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
 
-using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter>;
+using DelayChain = juce::dsp::ProcessorChain<Delay<float>>;
+
+using WaveShaper = juce::dsp::ProcessorChain<Distortion<float>>;
+
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, WaveShaper, DelayChain>;
 
 enum ChainPositions
 {
     LowCut,
-//    Peak,
-    HighCut
+    HighCut,
+    WaveshapingDistortion,
+    DistortedDelay
 };
 
 using Coefficients = Filter::CoefficientsPtr;
 void updateCoefficients(Coefficients& old, const Coefficients& replacements);
+
+Coefficients makePeakFilter(const ChainSettings& chainSettings, double sampleRate);
 
 template<int Index, typename ChainType, typename CoefficientType>
 void update(ChainType& chain, const CoefficientType& coefficients)
@@ -84,6 +96,65 @@ void updateCutFilter(ChainType& chain,
             update<0>(chain, coefficients);
         }
     }
+}
+
+template<typename ChainType, typename SettingsType>
+void updateDistortionGain(ChainType& chain, SettingsType chainSettings)
+{
+    chain.template setBypassed<0>(true);
+    chain.template setBypassed<1>(true);
+    chain.template setBypassed<2>(true);
+
+    chain.template get<0>().setPreGain(chainSettings.distortionPreGainInDecibels);
+    chain.template get<0>().setPostGain(chainSettings.distortionPostGainInDecibels);
+    
+    chain.template setBypassed<0>(false);
+    chain.template setBypassed<1>(false);
+    chain.template setBypassed<2>(false);
+}
+
+template<typename ChainType, typename SettingsType, typename ChannelNumber>
+void updateDelayValues(ChainType& chain, SettingsType chainSettings, ChannelNumber channelNumber)
+{
+    chain.template setBypassed<0>(true);
+    
+    chain.template get<0>().setDryLevel(chainSettings.delayDry);
+    chain.template get<0>().setWetLevel(chainSettings.delayWet);
+    chain.template get<0>().setFeedback(chainSettings.delayFeedback);
+    
+    chain.template get<0>().setLowCutFreq(chainSettings.delayLowCutFreq);
+    chain.template get<0>().setHighCutFreq(chainSettings.delayHighCutFreq);
+
+    chain.template get<0>().setDistortionPreGainAmount(chainSettings.delayDistortionPreGain);
+    chain.template get<0>().setDistortionPostGainAmount(chainSettings.delayDistortionPostGain);
+
+    switch( channelNumber )
+    {
+        case 0:
+        {
+            chain.template get<0>().setDelayTime(0, chainSettings.delayTimeLeft);
+            break;
+        }
+        case 1:
+        {
+            chain.template get<0>().setDelayTime(0, chainSettings.delayTimeRight);
+            break;
+
+        }
+    }
+    
+    chain.template setBypassed<0>(false);
+}
+
+template<typename ChainType, typename SettingsType>
+void muteDelay(ChainType& chain, SettingsType chainSettings)
+{
+    chain.template setBypassed<0>(true);
+
+    chain.template get<0>().setDryLevel(1);
+    chain.template get<0>().setWetLevel(0);
+    
+    chain.template setBypassed<0>(false);
 }
 
 inline auto makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate )
@@ -145,15 +216,19 @@ public:
     
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState apvts {*this, nullptr, "Parameters", createParameterLayout()};
+    
 private:
     MonoChain leftChain, rightChain;
     
+    std::unique_ptr<Distortion<float>> distortion;
+    
     void updateLowCutFilters(const ChainSettings& chainSettings);
     void updateHighCutFilters(const ChainSettings& chainSettings);
+    void updateDistortion(const ChainSettings& chainSettings);
+    void updateDelay(const ChainSettings& chainSettings);
     
-    void updateFilters();
+    void updateComponents();
     
-    juce::dsp::Oscillator<float> osc;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterPedalAudioProcessor)
 };

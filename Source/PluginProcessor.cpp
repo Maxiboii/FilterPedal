@@ -107,7 +107,7 @@ void FilterPedalAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     leftChain.prepare(spec);
     rightChain.prepare(spec);
     
-    updateFilters();
+    updateComponents();
 }
 
 void FilterPedalAudioProcessor::releaseResources()
@@ -157,7 +157,7 @@ void FilterPedalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-    updateFilters();
+    updateComponents();
 
     juce::dsp::AudioBlock<float> block(buffer);
 
@@ -203,7 +203,7 @@ void FilterPedalAudioProcessor::setStateInformation (const void* data, int sizeI
     if( tree.isValid() )
     {
         apvts.replaceState(tree);
-        updateFilters();
+        updateComponents();
     }
 }
 
@@ -212,12 +212,25 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     ChainSettings settings;
     
     settings.lowCutFreq = apvts.getRawParameterValue("LowCut Freq")->load();
-    settings.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
     settings.lowCutSlope = static_cast<Slope>(apvts.getRawParameterValue("LowCut Slope")->load());
+    settings.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
     settings.highCutSlope = static_cast<Slope>(apvts.getRawParameterValue("HighCut Slope")->load());
+    settings.distortionPreGainInDecibels = apvts.getRawParameterValue("Distortion Amount")->load();
+    settings.distortionPostGainInDecibels = apvts.getRawParameterValue("Distortion PostGain")->load();
+    settings.delayDry = apvts.getRawParameterValue("Delay Dry")->load();
+    settings.delayWet = apvts.getRawParameterValue("Delay Wet")->load();
+    settings.delayFeedback = apvts.getRawParameterValue("Delay Feedback")->load();
+    settings.delayTimeLeft = apvts.getRawParameterValue("Delay Time Left")->load();
+    settings.delayTimeRight = apvts.getRawParameterValue("Delay Time Right")->load();
+    settings.delayLowCutFreq = apvts.getRawParameterValue("Delay LowCut")->load();
+    settings.delayHighCutFreq = apvts.getRawParameterValue("Delay HighCut")->load();
+    settings.delayDistortionPreGain = apvts.getRawParameterValue("Delay Distortion")->load();
+    settings.delayDistortionPostGain = apvts.getRawParameterValue("Delay PostGain")->load();
     
     settings.lowCutBypassed = apvts.getRawParameterValue("LowCut Bypassed")->load() > 0.5f;
     settings.highCutBypassed = apvts.getRawParameterValue("HighCut Bypassed")->load() > 0.5f;
+    settings.distortionBypassed = apvts.getRawParameterValue("Distortion Bypassed")->load() > 0.5f;
+    settings.delayBypassed = apvts.getRawParameterValue("Delay Bypassed")->load() > 0.5f;
 
     return settings;
 }
@@ -255,12 +268,46 @@ void FilterPedalAudioProcessor::updateHighCutFilters(const ChainSettings &chainS
     updateCutFilter(rightHighCut, highCutCoefficients, chainSettings.highCutSlope);
 }
 
-void FilterPedalAudioProcessor::updateFilters()
+void FilterPedalAudioProcessor::updateDistortion(const ChainSettings &chainSettings)
+{
+    auto& leftDistortion = leftChain.get<ChainPositions::WaveshapingDistortion>();
+    auto& rightDistortion = rightChain.get<ChainPositions::WaveshapingDistortion>();
+
+    leftChain.setBypassed<ChainPositions::WaveshapingDistortion>(chainSettings.distortionBypassed);
+    rightChain.setBypassed<ChainPositions::WaveshapingDistortion>(chainSettings.distortionBypassed);
+
+    updateDistortionGain(leftDistortion, chainSettings);
+    updateDistortionGain(rightDistortion, chainSettings);
+}
+
+void FilterPedalAudioProcessor::updateDelay(const ChainSettings &chainSettings)
+{
+    auto& leftDelay = leftChain.get<ChainPositions::DistortedDelay>();
+    auto& rightDelay = rightChain.get<ChainPositions::DistortedDelay>();
+    
+    leftChain.setBypassed<ChainPositions::DistortedDelay>(chainSettings.delayBypassed);
+    rightChain.setBypassed<ChainPositions::DistortedDelay>(chainSettings.delayBypassed);
+    
+    if (chainSettings.delayBypassed == 1)
+    {
+        muteDelay(leftDelay, chainSettings);
+        muteDelay(rightDelay, chainSettings);
+    }
+    else
+    {
+        updateDelayValues(leftDelay, chainSettings, 0);
+        updateDelayValues(rightDelay, chainSettings, 1);
+    }
+}
+
+void FilterPedalAudioProcessor::updateComponents()
 {
     auto chainSettings = getChainSettings(apvts);
     
     updateLowCutFilters(chainSettings);
     updateHighCutFilters(chainSettings);
+    updateDistortion(chainSettings);
+    updateDelay(chainSettings);
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::createParameterLayout()
@@ -277,6 +324,62 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
                                                            juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
                                                            20000.f));
     
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Distortion Amount",
+                                                           "Distortion Amount",
+                                                           juce::NormalisableRange<float>(0.f, 48.f, 0.1f, 1.f),
+                                                           0.f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Distortion PostGain",
+                                                           "Distortion PostGain",
+                                                           juce::NormalisableRange<float>(-48.f, 48.f, 0.1f, 1.f),
+                                                           0.f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Dry",
+                                                           "Delay Dry",
+                                                           juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f),
+                                                           1.f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Wet",
+                                                           "Delay Wet",
+                                                           juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f),
+                                                           0.f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Feedback",
+                                                           "Delay Feedback",
+                                                           juce::NormalisableRange<float>(0.f, 0.99f, 0.01f, 1.f),
+                                                           0.3f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Time Left",
+                                                           "Delay Time Left",
+                                                           juce::NormalisableRange<float>(0.f, 3.f, 0.01f, 1.f),
+                                                           0.3f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Time Right",
+                                                           "Delay Time Right",
+                                                           juce::NormalisableRange<float>(0.f, 3.f, 0.01f, 1.f),
+                                                           0.3f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay LowCut",
+                                                           "Delay LowCut",
+                                                           juce::NormalisableRange<float>(200.f, 5000.f, 1.0f, 1.f),
+                                                           500.f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay HighCut",
+                                                           "Delay HighCut",
+                                                           juce::NormalisableRange<float>(3000.f, 10000.f, 1.0f, 1.f),
+                                                           5000.f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Distortion",
+                                                           "Delay Distortion",
+                                                           juce::NormalisableRange<float>(0.f, 48.f, 0.1f, 1.f),
+                                                           0.f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Delay PostGain",
+                                                           "Delay PostGain",
+                                                           juce::NormalisableRange<float>(-48.f, 48.f, 0.1f, 1.f),
+                                                           0.f));
+
+    
     juce::StringArray stringArray;
     for( int i = 0; i < 4; ++i )
     {
@@ -291,6 +394,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
     
     layout.add(std::make_unique<juce::AudioParameterBool>("LowCut Bypassed", "LowCut Bypassed", false));
     layout.add(std::make_unique<juce::AudioParameterBool>("HighCut Bypassed", "HighCut Bypassed", false));
+    layout.add(std::make_unique<juce::AudioParameterBool>("Distortion Bypassed", "Distortion Bypassed", false));
+    layout.add(std::make_unique<juce::AudioParameterBool>("Delay Bypassed", "Delay Bypassed", false));
     
     return layout;
 }

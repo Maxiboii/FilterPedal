@@ -135,6 +135,21 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
                                       startAng,
                                       endAng,
                                       *this);
+
+    for( int i = 0; i < nameLabels.size(); ++i )
+    {
+        auto pos = labels[i].pos;
+        jassert(0.f <= pos);
+        jassert(pos <= 1.f);
+        
+        Rectangle<float> r;
+        auto str = nameLabels[i].label;
+        r.setSize(g.getCurrentFont().getStringWidth(str), getTextHeight());
+        r.setCentre(sliderBounds.getCentreX(), sliderBounds.getCentreY());
+        r.setY(0);
+
+        g.drawFittedText(str, r.toNearestInt(), juce::Justification::centred, 1);
+    }
     
     auto center = sliderBounds.toFloat().getCentre();
     auto radius = sliderBounds.getWidth() * 0.5f;
@@ -169,11 +184,11 @@ juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
     
     auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
     
-    size -= getTextHeight() * 2;
+    size -= getTextHeight() * 3;
     juce::Rectangle<int> r;
     r.setSize(size, size);
     r.setCentre(bounds.getCentreX(), 0);
-    r.setY(2);
+    r.setY(r.getHeight() * 0.2);
     
     return r;
 }
@@ -264,12 +279,14 @@ void ResponseCurveComponent::updateChain()
 
     monoChain.setBypassed<ChainPositions::LowCut>(chainSettings.lowCutBypassed);
     monoChain.setBypassed<ChainPositions::HighCut>(chainSettings.highCutBypassed);
+//    monoChain.setBypassed<ChainPositions::WaveshapingDistortion>(chainSettings.distortionBypassed);
 
     auto lowCutCoefficients = makeLowCutFilter(chainSettings, audioProcessor.getSampleRate());
     auto highCutCoefficients = makeHighCutFilter(chainSettings, audioProcessor.getSampleRate());
 
     updateCutFilter(monoChain.get<ChainPositions::LowCut>(), lowCutCoefficients, chainSettings.lowCutSlope);
     updateCutFilter(monoChain.get<ChainPositions::HighCut>(), highCutCoefficients, chainSettings.highCutSlope);
+//    updateDistortionGain(monoChain.get<ChainPositions::WaveshapingDistortion>(), chainSettings);
 }
 
 void ResponseCurveComponent::paint (juce::Graphics& g)
@@ -286,6 +303,7 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
 
     auto& lowcut = monoChain.get<ChainPositions::LowCut>();
     auto& highcut = monoChain.get<ChainPositions::HighCut>();
+//    auto& peak = monoChain.get<ChainPositions::Peak>();
 
     auto sampleRate = audioProcessor.getSampleRate();
 
@@ -297,6 +315,9 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     {
         double mag = 1.f;
         auto freq = mapToLog10(double(i) / double(w), 20.0, 20000.0);
+
+//        if (! monoChain.isBypassed<ChainPositions::Peak>() )
+//            mag *= peak.coefficients->getMagnitudeForFrequency(freq, sampleRate);
 
         if ( !monoChain.isBypassed<ChainPositions::LowCut>() )
         {
@@ -474,33 +495,105 @@ FilterPedalAudioProcessorEditor::FilterPedalAudioProcessorEditor (FilterPedalAud
     : AudioProcessorEditor (&p), audioProcessor (p),
 
 lowCutFreqSlider(*audioProcessor.apvts.getParameter("LowCut Freq"), "Hz"),
-highCutFreqSlider(*audioProcessor.apvts.getParameter("HighCut Freq"), "Hz"),
 lowCutSlopeSlider(*audioProcessor.apvts.getParameter("LowCut Slope"), "dB/Oct"),
+highCutFreqSlider(*audioProcessor.apvts.getParameter("HighCut Freq"), "Hz"),
 highCutSlopeSlider(*audioProcessor.apvts.getParameter("HighCut Slope"), "dB/Oct"),
+distortionPreGainSlider(*audioProcessor.apvts.getParameter("Distortion Amount"), "dB"),
+distortionPostGainSlider(*audioProcessor.apvts.getParameter("Distortion PostGain"), "dB"),
+delayDrySlider(*audioProcessor.apvts.getParameter("Delay Dry"), ""),
+delayWetSlider(*audioProcessor.apvts.getParameter("Delay Wet"), ""),
+delayFeedbackSlider(*audioProcessor.apvts.getParameter("Delay Feedback"), ""),
+delayTimeLeftSlider(*audioProcessor.apvts.getParameter("Delay Time Left"), "s"),
+delayTimeRightSlider(*audioProcessor.apvts.getParameter("Delay Time Right"), "s"),
+delayLowCutSlider(*audioProcessor.apvts.getParameter("Delay LowCut"), "Hz"),
+delayHighCutSlider(*audioProcessor.apvts.getParameter("Delay HighCut"), "Hz"),
+delayDistortionPreGainSlider(*audioProcessor.apvts.getParameter("Delay Distortion"), ""),
+delayDistortionPostGainSlider(*audioProcessor.apvts.getParameter("Delay PostGain"), ""),
 
 responseCurveComponent(audioProcessor),
 lowCutFreqSliderAttachment(audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider),
-highCutFreqSliderAttachment(audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
 lowCutSlopeSliderAttachment(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSlider),
+highCutFreqSliderAttachment(audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
 highCutSlopeSliderAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSlider),
+distortionPreGainSliderAttachment(audioProcessor.apvts, "Distortion Amount", distortionPreGainSlider),
+distortionPostGainSliderAttachment(audioProcessor.apvts, "Distortion PostGain", distortionPostGainSlider),
+delayDrySliderAttachment(audioProcessor.apvts, "Delay Dry", delayDrySlider),
+delayWetSliderAttachment(audioProcessor.apvts, "Delay Wet", delayWetSlider),
+delayFeedbackSliderAttachment(audioProcessor.apvts, "Delay Feedback", delayFeedbackSlider),
+delayTimeLeftSliderAttachment(audioProcessor.apvts, "Delay Time Left", delayTimeLeftSlider),
+delayTimeRightSliderAttachment(audioProcessor.apvts, "Delay Time Right", delayTimeRightSlider),
+delayLowCutSliderAttachment(audioProcessor.apvts, "Delay LowCut", delayLowCutSlider),
+delayHighCutSliderAttachment(audioProcessor.apvts, "Delay HighCut", delayHighCutSlider),
+delayDistortionPreGainSliderAttachment(audioProcessor.apvts, "Delay Distortion", delayDistortionPreGainSlider),
+delayDistortionPostGainSliderAttachment(audioProcessor.apvts, "Delay PostGain", delayDistortionPostGainSlider),
 
 lowcutBypassButtonAttachment(audioProcessor.apvts, "LowCut Bypassed", lowcutBypassButton),
-highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutBypassButton)
+highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutBypassButton),
+distortionBypassButtonAttachment(audioProcessor.apvts, "Distortion Bypassed", distortionBypassButton),
+delayBypassButtonAttachment(audioProcessor.apvts, "Delay Bypassed", delayBypassButton)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     
     lowCutFreqSlider.labels.add({0.f, "20Hz"});
     lowCutFreqSlider.labels.add({1.f, "20kHz"});
+    lowCutFreqSlider.nameLabels.add({0.f, "Freq"});
     
     highCutFreqSlider.labels.add({0.f, "20Hz"});
     highCutFreqSlider.labels.add({1.f, "20kHz"});
+    highCutFreqSlider.nameLabels.add({0.f, "Freq"});
     
     lowCutSlopeSlider.labels.add({0.f, "12"});
     lowCutSlopeSlider.labels.add({1.f, "48"});
+    lowCutSlopeSlider.nameLabels.add({0.f, "Slope"});
     
     highCutSlopeSlider.labels.add({0.f, "12"});
     highCutSlopeSlider.labels.add({1.f, "48"});
+    highCutSlopeSlider.nameLabels.add({0.f, "Slope"});
+    
+    distortionPreGainSlider.labels.add({0.f, "0dB"});
+    distortionPreGainSlider.labels.add({1.f, "48dB"});
+    distortionPreGainSlider.nameLabels.add({0.f, "Amount"});
+    
+    distortionPostGainSlider.labels.add({0.f, "-48dB"});
+    distortionPostGainSlider.labels.add({1.f, "48dB"});
+    distortionPostGainSlider.nameLabels.add({0.f, "Post Gain"});
+    
+    delayDrySlider.labels.add({0.f, "0"});
+    delayDrySlider.labels.add({1.f, "100"});
+    delayDrySlider.nameLabels.add({0.f, "Dry"});
+
+    delayWetSlider.labels.add({0.f, "0"});
+    delayWetSlider.labels.add({1.f, "100"});
+    delayWetSlider.nameLabels.add({0.f, "Wet"});
+
+    delayFeedbackSlider.labels.add({0.f, "0"});
+    delayFeedbackSlider.labels.add({1.f, "100"});
+    delayFeedbackSlider.nameLabels.add({0.f, "Feedback"});
+    
+    delayTimeLeftSlider.labels.add({0.f, "0"});
+    delayTimeLeftSlider.labels.add({1.f, "3"});
+    delayTimeLeftSlider.nameLabels.add({0.f, "Time Left"});
+    
+    delayTimeRightSlider.labels.add({0.f, "0"});
+    delayTimeRightSlider.labels.add({1.f, "3"});
+    delayTimeRightSlider.nameLabels.add({0.f, "Time Right"});
+    
+    delayLowCutSlider.labels.add({0.f, "200"});
+    delayLowCutSlider.labels.add({1.f, "5000"});
+    delayLowCutSlider.nameLabels.add({0.f, "LowCut"});
+    
+    delayHighCutSlider.labels.add({0.f, "200"});
+    delayHighCutSlider.labels.add({1.f, "5000"});
+    delayHighCutSlider.nameLabels.add({0.f, "HighCut"});
+    
+    delayDistortionPreGainSlider.labels.add({0.f, "0"});
+    delayDistortionPreGainSlider.labels.add({1.f, "48"});
+    delayDistortionPreGainSlider.nameLabels.add({0.f, "Distortion"});
+    
+    delayDistortionPostGainSlider.labels.add({0.f, "-48"});
+    delayDistortionPostGainSlider.labels.add({1.f, "48"});
+    delayDistortionPostGainSlider.nameLabels.add({0.f, "Post Gain"});
     
     for( auto* comp: getComps() )
     {
@@ -509,9 +602,10 @@ highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutB
     
     lowcutBypassButton.setLookAndFeel(&lnf);
     highcutBypassButton.setLookAndFeel(&lnf);
+    distortionBypassButton.setLookAndFeel(&lnf);
+    delayBypassButton.setLookAndFeel(&lnf);
     
     auto safePtr = juce::Component::SafePointer<FilterPedalAudioProcessorEditor>(this);
-    
     lowcutBypassButton.onClick = [safePtr]()
     {
         if( auto* comp = safePtr.getComponent() )
@@ -534,6 +628,35 @@ highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutB
         }
     };
     
+    distortionBypassButton.onClick = [safePtr]()
+    {
+        if( auto* comp = safePtr.getComponent() )
+        {
+            auto bypassed = comp->distortionBypassButton.getToggleState();
+            
+            comp->distortionPreGainSlider.setEnabled( !bypassed );
+            comp->distortionPostGainSlider.setEnabled( !bypassed );
+        }
+    };
+    
+    delayBypassButton.onClick = [safePtr]()
+    {
+        if( auto* comp = safePtr.getComponent() )
+        {
+            auto bypassed = comp->delayBypassButton.getToggleState();
+
+            comp->delayDrySlider.setEnabled( !bypassed );
+            comp->delayWetSlider.setEnabled( !bypassed );
+            comp->delayFeedbackSlider.setEnabled( !bypassed );
+            comp->delayTimeLeftSlider.setEnabled( !bypassed );
+            comp->delayTimeRightSlider.setEnabled( !bypassed );
+            comp->delayLowCutSlider.setEnabled( !bypassed );
+            comp->delayHighCutSlider.setEnabled( !bypassed );
+            comp->delayDistortionPreGainSlider.setEnabled( !bypassed );
+            comp->delayDistortionPostGainSlider.setEnabled( !bypassed );
+        }
+    };
+    
     setSize (600, 480);
 }
 
@@ -541,6 +664,8 @@ FilterPedalAudioProcessorEditor::~FilterPedalAudioProcessorEditor()
 {
     lowcutBypassButton.setLookAndFeel(nullptr);
     highcutBypassButton.setLookAndFeel(nullptr);
+    distortionBypassButton.setLookAndFeel(nullptr);
+    delayBypassButton.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
@@ -567,8 +692,14 @@ void FilterPedalAudioProcessorEditor::resized()
     
     bounds.removeFromTop(5);
     
-    auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
-    auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
+    auto filterBounds = bounds.removeFromLeft(bounds.getWidth() * 0.3);
+    auto saturationBounds = bounds.removeFromLeft(bounds.getWidth() * 0.3);
+    auto delayBounds = bounds.removeFromLeft(bounds.getWidth() * 0.3);
+    auto delayBounds2 = bounds.removeFromLeft(bounds.getWidth() * 0.35);
+    auto delayBounds3 = bounds.removeFromLeft(bounds.getWidth() * 0.7);
+    
+    auto lowCutArea = filterBounds.removeFromLeft(filterBounds.getWidth() * 0.5);
+    auto highCutArea = filterBounds;
     
     lowcutBypassButton.setBounds(lowCutArea.removeFromTop(25));
     lowCutFreqSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
@@ -577,6 +708,28 @@ void FilterPedalAudioProcessorEditor::resized()
     highcutBypassButton.setBounds(highCutArea.removeFromTop(25));
     highCutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
     highCutSlopeSlider.setBounds(highCutArea);
+    
+    distortionBypassButton.setBounds(saturationBounds.removeFromTop(25));
+    distortionPreGainSlider.setBounds(saturationBounds.removeFromTop(saturationBounds.getHeight() * 0.5));
+    distortionPostGainSlider.setBounds(saturationBounds);
+    
+    delayBypassButton.setBounds(delayBounds.removeFromTop(25));
+    delayDrySlider.setBounds(delayBounds.removeFromTop(90));
+    delayWetSlider.setBounds(delayBounds.removeFromTop(90));
+    delayFeedbackSlider.setBounds(delayBounds.removeFromTop(90));
+    
+    //    delayMixSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
+    //    delayFeedbackSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
+    //    delayTimeLeftSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
+    //    delayTimeRightSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
+    
+    delayLowCutSlider.setBounds(delayBounds2.removeFromTop(80));
+    delayHighCutSlider.setBounds(delayBounds2.removeFromTop(80));
+    
+    delayTimeLeftSlider.setBounds(delayBounds3.removeFromTop(90));
+    delayTimeRightSlider.setBounds(delayBounds3.removeFromTop(90));
+    delayDistortionPreGainSlider.setBounds(delayBounds3.removeFromTop(90));
+    delayDistortionPostGainSlider.setBounds(delayBounds3.removeFromTop(90));
 }
 
 std::vector<juce::Component*> FilterPedalAudioProcessorEditor::getComps()
@@ -584,12 +737,25 @@ std::vector<juce::Component*> FilterPedalAudioProcessorEditor::getComps()
     return
     {
         &lowCutFreqSlider,
-        &highCutFreqSlider,
         &lowCutSlopeSlider,
+        &highCutFreqSlider,
         &highCutSlopeSlider,
+        &distortionPreGainSlider,
+        &distortionPostGainSlider,
         &responseCurveComponent,
+        &delayDrySlider,
+        &delayWetSlider,
+        &delayFeedbackSlider,
+        &delayTimeLeftSlider,
+        &delayTimeRightSlider,
+        &delayLowCutSlider,
+        &delayHighCutSlider,
+        &delayDistortionPreGainSlider,
+        &delayDistortionPostGainSlider,
         
         &lowcutBypassButton,
-        &highcutBypassButton
+        &highcutBypassButton,
+        &distortionBypassButton,
+        &delayBypassButton
     };
 }
