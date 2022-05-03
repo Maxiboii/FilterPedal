@@ -17,9 +17,6 @@ class Distortion
 {
 private:
     //==============================================================================
-    Type preGainAmount { Type (0) };
-    Type postGainAmount { Type (0) };
-    
     enum
     {
         preGainIndex,
@@ -34,6 +31,9 @@ private:
     
 public:
     //==============================================================================
+    Type preGainAmount { Type (0) };
+    Type postGainAmount { Type (0) };
+    
     Distortion()
     {
         processorChain = std::make_unique<ProcessorChain>();
@@ -94,6 +94,12 @@ public:
     {
         auto& postGain = processorChain->template get<postGainIndex>();
         postGain.setGainDecibels(amount);
+    }
+    
+    //==============================================================================
+    Type getPreGain () noexcept
+    {
+        return preGainAmount;
     }
     
 

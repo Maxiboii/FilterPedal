@@ -279,14 +279,13 @@ void ResponseCurveComponent::updateChain()
 
     monoChain.setBypassed<ChainPositions::LowCut>(chainSettings.lowCutBypassed);
     monoChain.setBypassed<ChainPositions::HighCut>(chainSettings.highCutBypassed);
-//    monoChain.setBypassed<ChainPositions::WaveshapingDistortion>(chainSettings.distortionBypassed);
 
     auto lowCutCoefficients = makeLowCutFilter(chainSettings, audioProcessor.getSampleRate());
     auto highCutCoefficients = makeHighCutFilter(chainSettings, audioProcessor.getSampleRate());
 
     updateCutFilter(monoChain.get<ChainPositions::LowCut>(), lowCutCoefficients, chainSettings.lowCutSlope);
     updateCutFilter(monoChain.get<ChainPositions::HighCut>(), highCutCoefficients, chainSettings.highCutSlope);
-//    updateDistortionGain(monoChain.get<ChainPositions::WaveshapingDistortion>(), chainSettings);
+    updateDistortionGain(monoChain.get<ChainPositions::WaveshapingDistortion>(), chainSettings);
 }
 
 void ResponseCurveComponent::paint (juce::Graphics& g)
@@ -303,7 +302,7 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
 
     auto& lowcut = monoChain.get<ChainPositions::LowCut>();
     auto& highcut = monoChain.get<ChainPositions::HighCut>();
-//    auto& peak = monoChain.get<ChainPositions::Peak>();
+    auto& distortion = monoChain.get<ChainPositions::WaveshapingDistortion>();
 
     auto sampleRate = audioProcessor.getSampleRate();
 
@@ -315,9 +314,6 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     {
         double mag = 1.f;
         auto freq = mapToLog10(double(i) / double(w), 20.0, 20000.0);
-
-//        if (! monoChain.isBypassed<ChainPositions::Peak>() )
-//            mag *= peak.coefficients->getMagnitudeForFrequency(freq, sampleRate);
 
         if ( !monoChain.isBypassed<ChainPositions::LowCut>() )
         {
@@ -345,6 +341,9 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
 
         mags[i] = Decibels::gainToDecibels(mag);
     }
+    
+    auto distortionPreGain = distortion.get<0>().getPreGain();
+//    std::cout << distortionPreGain << std::endl;
 
     Path responseCurve;
 
@@ -355,7 +354,7 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
         return jmap(input, -24.0, 24.0, outputMin, outputMax);
     };
 
-    responseCurve.startNewSubPath(responseArea.getX(), map(mags.front()));
+    responseCurve.startNewSubPath(responseArea.getX(), map(mags.front()) - distortionPreGain);
 
     for( size_t i = 1; i < mags.size(); ++i )
     {
