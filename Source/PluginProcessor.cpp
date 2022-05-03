@@ -304,11 +304,41 @@ void FilterPedalAudioProcessor::updateComponents()
 {
     auto chainSettings = getChainSettings(apvts);
     
+//    chainSettings.delayTimeLeft = smoothValue(chainSettings.delayTimeLeft);
+    
+//    auto delayTimeL = chainSettings.delayTimeLeft;
+//    juce::LinearSmoothedValue<float> smoothedValue { 0.0f };
+//    smoothedValue.reset(getSampleRate(), 0.001);
+//    smoothedValue.setTargetValue(delayTimeL);
+//    auto x = smoothedValue.getNextValue();
+//
+//    while (x != delayTimeL)
+//    {
+//        std::cout << x << "\n";
+//        x = smoothedValue.getNextValue();
+//        chainSettings.delayTimeLeft = x;
+//        updateDelay(chainSettings);
+//    }
+    updateDelay(chainSettings);
+    
     updateLowCutFilters(chainSettings);
     updateHighCutFilters(chainSettings);
     updateDistortion(chainSettings);
-    updateDelay(chainSettings);
 }
+
+//float FilterPedalAudioProcessor::smoothValue(float value)
+//{
+////    DBG(value);
+//    return 1.0f;
+////    juce::LinearSmoothedValue<float> smoothedValue { 0.0f };
+////    smoothedValue.reset(getSampleRate(), 0.000001);
+////    smoothedValue.setTargetValue(value);
+//////
+//////    DBG (smoothedGain.getNextValue());
+////    auto x = smoothedValue.getNextValue();
+////    DBG (x);
+////    return x;
+//}
 
 juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::createParameterLayout()
 {
