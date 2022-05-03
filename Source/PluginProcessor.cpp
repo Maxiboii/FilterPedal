@@ -316,12 +316,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq",
                                                            "LowCut Freq",
-                                                           juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
+                                                           juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.4f),
                                                            20.f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Freq",
                                                            "HighCut Freq",
-                                                           juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
+                                                           juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.5f),
                                                            20000.f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Distortion Amount",
@@ -361,12 +361,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout FilterPedalAudioProcessor::c
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Delay LowCut",
                                                            "Delay LowCut",
-                                                           juce::NormalisableRange<float>(200.f, 5000.f, 1.0f, 1.f),
+                                                           juce::NormalisableRange<float>(200.f, 5000.f, 1.0f, 0.9f),
                                                            500.f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Delay HighCut",
                                                            "Delay HighCut",
-                                                           juce::NormalisableRange<float>(3000.f, 10000.f, 1.0f, 1.f),
+                                                           juce::NormalisableRange<float>(3000.f, 10000.f, 1.0f, 0.9f),
                                                            5000.f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Delay Distortion",
