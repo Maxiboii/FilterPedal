@@ -93,7 +93,7 @@ void LookAndFeel::drawToggleButton(juce::Graphics &g,
                                   size * 0.5,
                                   size * 0.5,
                                   0.f,
-                                  degreesToRadians(30),
+                                  degreesToRadians(30.f),
                                   degreesToRadians(360.f - ang),
                                   true);
         
