@@ -379,9 +379,11 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     g.drawRoundedRectangle(getRenderArea().toFloat(), 4.f, 1.f);
 
     auto redValue = 0u + distortionPreGain * 4.3f + distortionPostGain * 1.f;
+    auto greenValue = 255u - distortionPreGain * 3.9f - distortionPostGain * 0.7f;
     redValue = redValue < 0 ? 0u : redValue;
+    greenValue = greenValue > 255 ? 255u : greenValue;
     auto responseCurveColour = Colour(redValue,
-                                      255u - distortionPreGain * 3.9f,
+                                      greenValue,
                                       255u - distortionPreGain * 5.3f);
     g.setColour(responseCurveColour);
     g.strokePath(responseCurve, PathStrokeType(2.f));
