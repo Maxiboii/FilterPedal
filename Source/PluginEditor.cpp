@@ -347,6 +347,12 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     {
         distortionPreGain = distortion.get<0>().getPreGain();
     }
+    
+    auto distortionPostGain {0.f};
+    if ( !monoChain.isBypassed<ChainPositions::WaveshapingDistortion>() )
+    {
+        distortionPostGain = distortion.get<0>().getPostGain();
+    }
 
     Path responseCurve;
 
@@ -367,7 +373,12 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     g.setColour(Colours::orange);
     g.drawRoundedRectangle(getRenderArea().toFloat(), 4.f, 1.f);
 
-    g.setColour(Colours::white);
+    auto redValue = 0u + distortionPreGain * 4.3f + distortionPostGain * 1.f;
+    redValue = redValue < 0 ? 0u : redValue;
+    auto responseCurveColour = Colour(redValue,
+                                      255u - distortionPreGain * 3.9f,
+                                      255u - distortionPreGain * 5.3f);
+    g.setColour(responseCurveColour);
     g.strokePath(responseCurve, PathStrokeType(2.f));
 }
 
