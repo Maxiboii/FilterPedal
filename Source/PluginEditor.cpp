@@ -9,6 +9,10 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+
+auto orange = juce::Colour(225u, 134u, 1u);
+auto blue = juce::Colour(0u, 220u, 255u);
+
 void LookAndFeel::drawRotarySlider(juce::Graphics & g,
                                    int x,
                                    int y,
@@ -25,11 +29,11 @@ void LookAndFeel::drawRotarySlider(juce::Graphics & g,
     
     auto enabled = slider.isEnabled();
     
-    g.setColour(enabled ? Colour(97u, 18u, 167u) : Colours::darkgrey);
+    g.setColour(enabled ? Colour(102u, 102u, 102u) : Colours::darkgrey);
     g.fillEllipse(bounds);
     
-    g.setColour(enabled ? Colour(255u, 154u, 1u) : Colours::grey);
-    g.drawEllipse(bounds, 1.f);
+    g.setColour(enabled ? orange : Colours::grey);
+    g.drawEllipse(bounds, 1.5f);
     
     if( auto* rswl = dynamic_cast<RotarySliderWithLabels*>(&slider))
     {
@@ -59,10 +63,7 @@ void LookAndFeel::drawRotarySlider(juce::Graphics & g,
         r.setSize(strWidth + 4, rswl->getTextHeight() + 2);
         r.setCentre(bounds.getCentre());
         
-        g.setColour(enabled ? Colours::black : Colours::darkgrey);
-        g.fillRect(r);
-        
-        g.setColour(enabled ? Colours::white : Colours::lightgrey);
+        g.setColour(enabled ? blue : Colours::lightgrey);
         g.drawFittedText(text, r.toNearestInt(), juce::Justification::centred, 1);
     }
     
@@ -102,7 +103,7 @@ void LookAndFeel::drawToggleButton(juce::Graphics &g,
         
         PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved);
         
-        auto color = toggleButton.getToggleState() ? Colours::dimgrey : Colour(0u, 172u, 1u);
+        auto color = toggleButton.getToggleState() ? Colours::dimgrey : blue;
         
         g.setColour(color);
         g.strokePath(powerButton, pst);
@@ -136,6 +137,7 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
                                       endAng,
                                       *this);
 
+    g.setColour(Colours::whitesmoke);
     for( int i = 0; i < nameLabels.size(); ++i )
     {
         auto pos = labels[i].pos;
@@ -154,7 +156,7 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
     auto center = sliderBounds.toFloat().getCentre();
     auto radius = sliderBounds.getWidth() * 0.5f;
     
-    g.setColour(Colour(0u, 172u, 1u));
+    g.setColour(Colours::whitesmoke);
     g.setFont(getTextHeight());
     
     auto numChoices = labels.size();
@@ -297,7 +299,7 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
 {
     using namespace juce;
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (Colours::black);
+//    g.fillAll (Colours::lightslategrey);
 
     g.drawImage(background, getLocalBounds().toFloat());
 
@@ -375,9 +377,6 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
         responseCurve.lineTo(responseArea.getX() + i, map(mags[i]) - distortionPreGain);
     }
 
-    g.setColour(Colours::orange);
-    g.drawRoundedRectangle(getRenderArea().toFloat(), 4.f, 1.f);
-
     auto redValue = 0u + distortionPreGain * 4.3f + distortionPostGain * 1.f;
     auto greenValue = 255u - distortionPreGain * 3.9f - distortionPostGain * 0.7f;
     redValue = redValue < 0 ? 0u : redValue;
@@ -387,6 +386,9 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
                                       255u - distortionPreGain * 5.3f);
     g.setColour(responseCurveColour);
     g.strokePath(responseCurve, PathStrokeType(2.f));
+    
+    g.setColour(Colours::darkgrey);
+    g.drawRoundedRectangle(getRenderArea().toFloat(), 3.f, 3.f);
 }
 
 void ResponseCurveComponent::resized()
@@ -418,7 +420,7 @@ void ResponseCurveComponent::resized()
         xs.add(left + width * normX);
     }
 
-    g.setColour(Colours::dimgrey);
+    g.setColour(Colour(60u, 60u, 65u));
     for( auto x : xs )
     {
         g.drawVerticalLine(x, top, bottom);
@@ -432,12 +434,12 @@ void ResponseCurveComponent::resized()
     for( auto gDb : gain)
     {
         auto y = jmap(gDb, -48.f, 48.f, float(bottom), float(top));
-        g.setColour(gDb == 0.f ? Colour(0u, 172u, 1u) : Colours::darkgrey);
+        g.setColour(gDb == 0.f ? orange : Colour(60u, 60u, 65u));
         g.drawHorizontalLine(y, left, right);
     }
 
-    g.setColour(Colours::lightgrey);
-    const int fontHeight = 10;
+    g.setColour(Colours::whitesmoke);
+    const int fontHeight = 11;
     g.setFont(fontHeight);
 
     for( int i = 0; i < freqs.size(); ++i )
@@ -456,7 +458,7 @@ void ResponseCurveComponent::resized()
         str << f;
         if( addK )
             str << "k";
-        str << "Hz";
+//        str << "Hz";
 
         auto textWidth = g.getCurrentFont().getStringWidth(str);
 
@@ -484,7 +486,7 @@ void ResponseCurveComponent::resized()
         r.setX(getWidth() - textWidth);
         r.setCentre(r.getCentreX(), y);
 
-        g.setColour(gDb == 0.f ? Colour(0u, 172u, 1u) : Colours::lightgrey );
+        g.setColour(gDb == 0.f ? blue : Colours::lightgrey );
 
         g.drawFittedText(str, r, juce::Justification::centred, 1);
     }
@@ -495,7 +497,7 @@ juce::Rectangle<int> ResponseCurveComponent::getRenderArea()
     auto bounds = getLocalBounds();
 
     bounds.removeFromTop(12);
-    bounds.removeFromBottom(2);
+    bounds.removeFromBottom(1);
     bounds.removeFromLeft(20);
     bounds.removeFromRight(20);
 
@@ -693,7 +695,7 @@ void FilterPedalAudioProcessorEditor::paint (juce::Graphics& g)
 {
     using namespace juce;
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (Colours::black);
+    g.fillAll (Colour(40u, 40u, 43u));
     
     auto width = getWidth();
     auto height = getHeight();
@@ -722,7 +724,7 @@ void FilterPedalAudioProcessorEditor::drawComponentLabel (std::string label, flo
     r.setTop(height * 0.26);
     r.setBottom(height * 0.3);
     
-    g.setColour(Colours::white);
+    g.setColour(Colours::whitesmoke);
 //    g.drawRect(r);
     g.setFont(20);
     g.drawFittedText(label, r.toNearestInt(), juce::Justification::centred, 1);
