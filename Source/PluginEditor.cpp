@@ -571,28 +571,28 @@ delayBypassButtonAttachment(audioProcessor.apvts, "Delay Bypassed", delayBypassB
     delayFeedbackSlider.labels.add({1.f, "100"});
     delayFeedbackSlider.nameLabels.add({0.f, "Feedback"});
     
-    delayTimeLeftSlider.labels.add({0.f, "0"});
-    delayTimeLeftSlider.labels.add({1.f, "3"});
+    delayTimeLeftSlider.labels.add({0.f, "0s"});
+    delayTimeLeftSlider.labels.add({1.f, "3s"});
     delayTimeLeftSlider.nameLabels.add({0.f, "Time Left"});
     
-    delayTimeRightSlider.labels.add({0.f, "0"});
-    delayTimeRightSlider.labels.add({1.f, "3"});
+    delayTimeRightSlider.labels.add({0.f, "0s"});
+    delayTimeRightSlider.labels.add({1.f, "3s"});
     delayTimeRightSlider.nameLabels.add({0.f, "Time Right"});
     
-    delayLowCutSlider.labels.add({0.f, "200"});
-    delayLowCutSlider.labels.add({1.f, "5000"});
+    delayLowCutSlider.labels.add({0.f, "200Hz"});
+    delayLowCutSlider.labels.add({1.f, "5000Hz"});
     delayLowCutSlider.nameLabels.add({0.f, "LowCut"});
     
-    delayHighCutSlider.labels.add({0.f, "200"});
-    delayHighCutSlider.labels.add({1.f, "5000"});
+    delayHighCutSlider.labels.add({0.f, "200Hz"});
+    delayHighCutSlider.labels.add({1.f, "5000Hz"});
     delayHighCutSlider.nameLabels.add({0.f, "HighCut"});
     
-    delayDistortionPreGainSlider.labels.add({0.f, "0"});
-    delayDistortionPreGainSlider.labels.add({1.f, "48"});
+    delayDistortionPreGainSlider.labels.add({0.f, "0dB"});
+    delayDistortionPreGainSlider.labels.add({1.f, "48dB"});
     delayDistortionPreGainSlider.nameLabels.add({0.f, "Distortion"});
     
-    delayDistortionPostGainSlider.labels.add({0.f, "-48"});
-    delayDistortionPostGainSlider.labels.add({1.f, "48"});
+    delayDistortionPostGainSlider.labels.add({0.f, "-48dB"});
+    delayDistortionPostGainSlider.labels.add({1.f, "48dB"});
     delayDistortionPostGainSlider.nameLabels.add({0.f, "Post Gain"});
     
     for( auto* comp: getComps() )
@@ -657,7 +657,7 @@ delayBypassButtonAttachment(audioProcessor.apvts, "Delay Bypassed", delayBypassB
         }
     };
     
-    setSize (600, 480);
+    setSize (700, 480);
 }
 
 FilterPedalAudioProcessorEditor::~FilterPedalAudioProcessorEditor()
@@ -692,14 +692,20 @@ void FilterPedalAudioProcessorEditor::resized()
     
     bounds.removeFromTop(5);
     
-    auto filterBounds = bounds.removeFromLeft(bounds.getWidth() * 0.3);
-    auto saturationBounds = bounds.removeFromLeft(bounds.getWidth() * 0.3);
-    auto delayBounds = bounds.removeFromLeft(bounds.getWidth() * 0.3);
-    auto delayBounds2 = bounds.removeFromLeft(bounds.getWidth() * 0.35);
-    auto delayBounds3 = bounds.removeFromLeft(bounds.getWidth() * 0.7);
+    auto initialBoundWidth = bounds.getWidth();
+    auto filterBounds = bounds.removeFromLeft(initialBoundWidth * 0.4);
+    auto saturationBounds = bounds.removeFromLeft(initialBoundWidth * 0.2);
+    auto delayBounds = bounds;
+    
     
     auto lowCutArea = filterBounds.removeFromLeft(filterBounds.getWidth() * 0.5);
     auto highCutArea = filterBounds;
+    auto delayBypassButtonBounds = delayBounds.removeFromTop(25);
+    delayBounds.removeFromTop(10);
+    auto initialdelayBoundsWidth = delayBounds.getWidth();
+    auto delayColumn1 = delayBounds.removeFromLeft(initialdelayBoundsWidth * 0.3333);
+    auto delayColumn2 = delayBounds.removeFromLeft(initialdelayBoundsWidth * 0.3333);
+    auto delayColumn3 = delayBounds;
     
     lowcutBypassButton.setBounds(lowCutArea.removeFromTop(25));
     lowCutFreqSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
@@ -713,23 +719,20 @@ void FilterPedalAudioProcessorEditor::resized()
     distortionPreGainSlider.setBounds(saturationBounds.removeFromTop(saturationBounds.getHeight() * 0.5));
     distortionPostGainSlider.setBounds(saturationBounds);
     
-    delayBypassButton.setBounds(delayBounds.removeFromTop(25));
-    delayDrySlider.setBounds(delayBounds.removeFromTop(90));
-    delayWetSlider.setBounds(delayBounds.removeFromTop(90));
-    delayFeedbackSlider.setBounds(delayBounds.removeFromTop(90));
+    auto delaySliderHeight = 100;
     
-    //    delayMixSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
-    //    delayFeedbackSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
-    //    delayTimeLeftSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
-    //    delayTimeRightSlider.setBounds(delayBounds.removeFromTop(delayBounds.getHeight() * JUCE_LIVE_CONSTANT(0.5)));
+    delayBypassButton.setBounds(delayBypassButtonBounds);
+    delayDrySlider.setBounds(delayColumn1.removeFromTop(delaySliderHeight));
+    delayWetSlider.setBounds(delayColumn1.removeFromTop(delaySliderHeight));
+    delayFeedbackSlider.setBounds(delayColumn1.removeFromTop(delaySliderHeight));
     
-    delayLowCutSlider.setBounds(delayBounds2.removeFromTop(80));
-    delayHighCutSlider.setBounds(delayBounds2.removeFromTop(80));
+    delayLowCutSlider.setBounds(delayColumn2.removeFromTop(delaySliderHeight));
+    delayTimeLeftSlider.setBounds(delayColumn2.removeFromTop(delaySliderHeight));
+    delayDistortionPreGainSlider.setBounds(delayColumn2.removeFromTop(delaySliderHeight));
     
-    delayTimeLeftSlider.setBounds(delayBounds3.removeFromTop(90));
-    delayTimeRightSlider.setBounds(delayBounds3.removeFromTop(90));
-    delayDistortionPreGainSlider.setBounds(delayBounds3.removeFromTop(90));
-    delayDistortionPostGainSlider.setBounds(delayBounds3.removeFromTop(90));
+    delayHighCutSlider.setBounds(delayColumn3.removeFromTop(delaySliderHeight));
+    delayTimeRightSlider.setBounds(delayColumn3.removeFromTop(delaySliderHeight));
+    delayDistortionPostGainSlider.setBounds(delayColumn3.removeFromTop(delaySliderHeight));
 }
 
 std::vector<juce::Component*> FilterPedalAudioProcessorEditor::getComps()
