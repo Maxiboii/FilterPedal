@@ -184,11 +184,11 @@ juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
     
     auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
     
-    size -= getTextHeight() * 3;
+    size -= getTextHeight() * 2.5;
     juce::Rectangle<int> r;
     r.setSize(size, size);
     r.setCentre(bounds.getCentreX(), 0);
-    r.setY(r.getHeight() * 0.2);
+    r.setY(getTextHeight() * 1.2);
     
     return r;
 }
@@ -204,6 +204,11 @@ juce::String RotarySliderWithLabels::getDisplayString() const
     if( auto* floatParam = dynamic_cast<juce::AudioParameterFloat*>(param) )
     {
         float val = getValue();
+        auto paramName = floatParam->getName(100);
+        if ( paramName == "Delay Dry" || paramName == "Delay Wet")
+        {
+            val *= 100;
+        }
         
         if( val > 999.f )
         {
@@ -513,8 +518,8 @@ highCutFreqSlider(*audioProcessor.apvts.getParameter("HighCut Freq"), "Hz"),
 highCutSlopeSlider(*audioProcessor.apvts.getParameter("HighCut Slope"), "dB/Oct"),
 distortionPreGainSlider(*audioProcessor.apvts.getParameter("Distortion Amount"), "dB"),
 distortionPostGainSlider(*audioProcessor.apvts.getParameter("Distortion PostGain"), "dB"),
-delayDrySlider(*audioProcessor.apvts.getParameter("Delay Dry"), ""),
-delayWetSlider(*audioProcessor.apvts.getParameter("Delay Wet"), ""),
+delayDrySlider(*audioProcessor.apvts.getParameter("Delay Dry"), "%"),
+delayWetSlider(*audioProcessor.apvts.getParameter("Delay Wet"), "%"),
 delayFeedbackSlider(*audioProcessor.apvts.getParameter("Delay Feedback"), ""),
 delayTimeLeftSlider(*audioProcessor.apvts.getParameter("Delay Time Left"), "s"),
 delayTimeRightSlider(*audioProcessor.apvts.getParameter("Delay Time Right"), "s"),
@@ -572,16 +577,16 @@ delayBypassButtonAttachment(audioProcessor.apvts, "Delay Bypassed", delayBypassB
     distortionPostGainSlider.labels.add({1.f, "48dB"});
     distortionPostGainSlider.nameLabels.add({0.f, "Post Gain"});
     
-    delayDrySlider.labels.add({0.f, "0"});
-    delayDrySlider.labels.add({1.f, "100"});
+    delayDrySlider.labels.add({0.f, "0%"});
+    delayDrySlider.labels.add({1.f, "100%"});
     delayDrySlider.nameLabels.add({0.f, "Dry"});
 
-    delayWetSlider.labels.add({0.f, "0"});
-    delayWetSlider.labels.add({1.f, "100"});
+    delayWetSlider.labels.add({0.f, "0%"});
+    delayWetSlider.labels.add({1.f, "100%"});
     delayWetSlider.nameLabels.add({0.f, "Wet"});
 
     delayFeedbackSlider.labels.add({0.f, "0"});
-    delayFeedbackSlider.labels.add({1.f, "100"});
+    delayFeedbackSlider.labels.add({1.f, "1"});
     delayFeedbackSlider.nameLabels.add({0.f, "Feedback"});
     
     delayTimeLeftSlider.labels.add({0.f, "0s"});
@@ -593,11 +598,11 @@ delayBypassButtonAttachment(audioProcessor.apvts, "Delay Bypassed", delayBypassB
     delayTimeRightSlider.nameLabels.add({0.f, "Time Right"});
     
     delayLowCutSlider.labels.add({0.f, "200Hz"});
-    delayLowCutSlider.labels.add({1.f, "5000Hz"});
+    delayLowCutSlider.labels.add({1.f, "5kHz"});
     delayLowCutSlider.nameLabels.add({0.f, "LowCut"});
     
-    delayHighCutSlider.labels.add({0.f, "200Hz"});
-    delayHighCutSlider.labels.add({1.f, "5000Hz"});
+    delayHighCutSlider.labels.add({0.f, "3kHz"});
+    delayHighCutSlider.labels.add({1.f, "10kHz"});
     delayHighCutSlider.nameLabels.add({0.f, "HighCut"});
     
     delayDistortionPreGainSlider.labels.add({0.f, "0dB"});
