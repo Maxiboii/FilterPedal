@@ -692,9 +692,9 @@ void FilterPedalAudioProcessorEditor::resized()
     
     bounds.removeFromTop(5);
     
-    auto initialBoundWidth = bounds.getWidth();
-    auto filterBounds = bounds.removeFromLeft(initialBoundWidth * 0.4);
-    auto saturationBounds = bounds.removeFromLeft(initialBoundWidth * 0.2);
+    auto initialBoundsWidth = bounds.getWidth();
+    auto filterBounds = bounds.removeFromLeft(initialBoundsWidth * 0.4);
+    auto saturationBounds = bounds.removeFromLeft(initialBoundsWidth * 0.2);
     auto delayBounds = bounds;
     
     
