@@ -692,6 +692,14 @@ void FilterPedalAudioProcessorEditor::paint (juce::Graphics& g)
     using namespace juce;
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (Colours::black);
+    
+    auto width = getWidth();
+    auto height = getHeight();
+    
+    g.setColour(Colours::darkgrey);
+//    g.setOpacity(0.5f);
+    g.drawVerticalLine(width * 0.4, height * 0.35, height * 0.9);
+    g.drawVerticalLine(width * 0.6, height * 0.35, height * 0.9);
 }
 
 void FilterPedalAudioProcessorEditor::resized()
