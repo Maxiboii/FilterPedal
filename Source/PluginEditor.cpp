@@ -342,8 +342,11 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
         mags[i] = Decibels::gainToDecibels(mag);
     }
     
-    auto distortionPreGain = distortion.get<0>().getPreGain();
-//    std::cout << distortionPreGain << std::endl;
+    auto distortionPreGain {0.f};
+    if ( !monoChain.isBypassed<ChainPositions::WaveshapingDistortion>() )
+    {
+        distortionPreGain = distortion.get<0>().getPreGain();
+    }
 
     Path responseCurve;
 
@@ -351,14 +354,14 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     const double outputMax = responseArea.getY();
     auto map = [outputMin, outputMax](double input)
     {
-        return jmap(input, -24.0, 24.0, outputMin, outputMax);
+        return jmap(input, -48.0, 48.0, outputMin, outputMax);
     };
 
-    responseCurve.startNewSubPath(responseArea.getX(), map(mags.front()) - distortionPreGain);
+    responseCurve.startNewSubPath(responseArea.getX(), map(mags.front()));
 
     for( size_t i = 1; i < mags.size(); ++i )
     {
-        responseCurve.lineTo(responseArea.getX() + i, map(mags[i]));
+        responseCurve.lineTo(responseArea.getX() + i, map(mags[i]) - distortionPreGain);
     }
 
     g.setColour(Colours::orange);
@@ -405,12 +408,12 @@ void ResponseCurveComponent::resized()
 
     Array<float> gain
     {
-        -24, -12, 0, 12, 24
+        -48, -24, 0, 24, 48
     };
 
     for( auto gDb : gain)
     {
-        auto y = jmap(gDb, -24.f, 24.f, float(bottom), float(top));
+        auto y = jmap(gDb, -48.f, 48.f, float(bottom), float(top));
         g.setColour(gDb == 0.f ? Colour(0u, 172u, 1u) : Colours::darkgrey);
         g.drawHorizontalLine(y, left, right);
     }
@@ -449,7 +452,7 @@ void ResponseCurveComponent::resized()
 
     for( auto gDb : gain)
     {
-        auto y = jmap(gDb, -24.f, 24.f, float(bottom), float(top));
+        auto y = jmap(gDb, -48.f, 48.f, float(bottom), float(top));
 
         String str;
         if( gDb > 0 )

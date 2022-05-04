@@ -97,9 +97,14 @@ public:
     }
     
     //==============================================================================
-    Type getPreGain () noexcept
+    auto getPreGain () noexcept
     {
-        return preGainAmount;
+        return processorChain->template get<preGainIndex>().getGainDecibels();
+    }
+    
+    auto getPostGain () noexcept
+    {
+        return processorChain->template get<postGainIndex>().getGainDecibels();
     }
     
 
