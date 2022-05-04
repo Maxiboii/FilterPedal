@@ -279,14 +279,13 @@ void ResponseCurveComponent::updateChain()
 
     monoChain.setBypassed<ChainPositions::LowCut>(chainSettings.lowCutBypassed);
     monoChain.setBypassed<ChainPositions::HighCut>(chainSettings.highCutBypassed);
-//    monoChain.setBypassed<ChainPositions::WaveshapingDistortion>(chainSettings.distortionBypassed);
 
     auto lowCutCoefficients = makeLowCutFilter(chainSettings, audioProcessor.getSampleRate());
     auto highCutCoefficients = makeHighCutFilter(chainSettings, audioProcessor.getSampleRate());
 
     updateCutFilter(monoChain.get<ChainPositions::LowCut>(), lowCutCoefficients, chainSettings.lowCutSlope);
     updateCutFilter(monoChain.get<ChainPositions::HighCut>(), highCutCoefficients, chainSettings.highCutSlope);
-//    updateDistortionGain(monoChain.get<ChainPositions::WaveshapingDistortion>(), chainSettings);
+    updateDistortionGain(monoChain.get<ChainPositions::WaveshapingDistortion>(), chainSettings);
 }
 
 void ResponseCurveComponent::paint (juce::Graphics& g)
@@ -303,7 +302,7 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
 
     auto& lowcut = monoChain.get<ChainPositions::LowCut>();
     auto& highcut = monoChain.get<ChainPositions::HighCut>();
-//    auto& peak = monoChain.get<ChainPositions::Peak>();
+    auto& distortion = monoChain.get<ChainPositions::WaveshapingDistortion>();
 
     auto sampleRate = audioProcessor.getSampleRate();
 
@@ -315,9 +314,6 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     {
         double mag = 1.f;
         auto freq = mapToLog10(double(i) / double(w), 20.0, 20000.0);
-
-//        if (! monoChain.isBypassed<ChainPositions::Peak>() )
-//            mag *= peak.coefficients->getMagnitudeForFrequency(freq, sampleRate);
 
         if ( !monoChain.isBypassed<ChainPositions::LowCut>() )
         {
@@ -345,6 +341,18 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
 
         mags[i] = Decibels::gainToDecibels(mag);
     }
+    
+    auto distortionPreGain {0.f};
+    if ( !monoChain.isBypassed<ChainPositions::WaveshapingDistortion>() )
+    {
+        distortionPreGain = distortion.get<0>().getPreGain();
+    }
+    
+    auto distortionPostGain {0.f};
+    if ( !monoChain.isBypassed<ChainPositions::WaveshapingDistortion>() )
+    {
+        distortionPostGain = distortion.get<0>().getPostGain();
+    }
 
     Path responseCurve;
 
@@ -352,20 +360,25 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     const double outputMax = responseArea.getY();
     auto map = [outputMin, outputMax](double input)
     {
-        return jmap(input, -24.0, 24.0, outputMin, outputMax);
+        return jmap(input, -48.0, 48.0, outputMin, outputMax);
     };
 
     responseCurve.startNewSubPath(responseArea.getX(), map(mags.front()));
 
     for( size_t i = 1; i < mags.size(); ++i )
     {
-        responseCurve.lineTo(responseArea.getX() + i, map(mags[i]));
+        responseCurve.lineTo(responseArea.getX() + i, map(mags[i]) - distortionPreGain);
     }
 
     g.setColour(Colours::orange);
     g.drawRoundedRectangle(getRenderArea().toFloat(), 4.f, 1.f);
 
-    g.setColour(Colours::white);
+    auto redValue = 0u + distortionPreGain * 4.3f + distortionPostGain * 1.f;
+    redValue = redValue < 0 ? 0u : redValue;
+    auto responseCurveColour = Colour(redValue,
+                                      255u - distortionPreGain * 3.9f,
+                                      255u - distortionPreGain * 5.3f);
+    g.setColour(responseCurveColour);
     g.strokePath(responseCurve, PathStrokeType(2.f));
 }
 
@@ -406,12 +419,12 @@ void ResponseCurveComponent::resized()
 
     Array<float> gain
     {
-        -24, -12, 0, 12, 24
+        -48, -24, 0, 24, 48
     };
 
     for( auto gDb : gain)
     {
-        auto y = jmap(gDb, -24.f, 24.f, float(bottom), float(top));
+        auto y = jmap(gDb, -48.f, 48.f, float(bottom), float(top));
         g.setColour(gDb == 0.f ? Colour(0u, 172u, 1u) : Colours::darkgrey);
         g.drawHorizontalLine(y, left, right);
     }
@@ -450,7 +463,7 @@ void ResponseCurveComponent::resized()
 
     for( auto gDb : gain)
     {
-        auto y = jmap(gDb, -24.f, 24.f, float(bottom), float(top));
+        auto y = jmap(gDb, -48.f, 48.f, float(bottom), float(top));
 
         String str;
         if( gDb > 0 )
