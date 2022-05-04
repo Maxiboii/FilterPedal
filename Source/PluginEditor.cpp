@@ -675,7 +675,7 @@ delayBypassButtonAttachment(audioProcessor.apvts, "Delay Bypassed", delayBypassB
         }
     };
     
-    setSize (700, 480);
+    setSize (700, 500);
 }
 
 FilterPedalAudioProcessorEditor::~FilterPedalAudioProcessorEditor()
@@ -698,8 +698,32 @@ void FilterPedalAudioProcessorEditor::paint (juce::Graphics& g)
     
     g.setColour(Colours::darkgrey);
 //    g.setOpacity(0.5f);
-    g.drawVerticalLine(width * 0.4, height * 0.35, height * 0.9);
-    g.drawVerticalLine(width * 0.6, height * 0.35, height * 0.9);
+    g.drawVerticalLine(width * 0.4, height * 0.365, height * 0.935);
+    g.drawVerticalLine(width * 0.6, height * 0.365, height * 0.935);
+    
+    drawComponentLabel("Low Cut", 0.1, g);
+    drawComponentLabel("High Cut", 0.3, g);
+    drawComponentLabel("Distortion", 0.5, g);
+    drawComponentLabel("Delay", 0.8, g);
+}
+
+void FilterPedalAudioProcessorEditor::drawComponentLabel (std::string label, float x, juce::Graphics& g)
+{
+    using namespace juce;
+    
+    auto width = getWidth();
+    auto height = getHeight();
+    
+    Rectangle<float> r;
+    r.setLeft(width * x - 50);
+    r.setRight(width * x + 50);
+    r.setTop(height * 0.26);
+    r.setBottom(height * 0.3);
+    
+    g.setColour(Colours::white);
+//    g.drawRect(r);
+    g.setFont(20);
+    g.drawFittedText(label, r.toNearestInt(), juce::Justification::centred, 1);
 }
 
 void FilterPedalAudioProcessorEditor::resized()
@@ -716,7 +740,7 @@ void FilterPedalAudioProcessorEditor::resized()
     
     responseCurveComponent.setBounds(responseArea);
     
-    bounds.removeFromTop(5);
+    bounds.removeFromTop(25);
     
     auto initialBoundsWidth = bounds.getWidth();
     auto filterBounds = bounds.removeFromLeft(initialBoundsWidth * 0.4);
@@ -733,7 +757,7 @@ void FilterPedalAudioProcessorEditor::resized()
     auto highCutButtonArea = highCutArea.removeFromTop(buttonHeight);
     auto distortionButtonArea = distortionBounds.removeFromTop(buttonHeight);
     auto delayBypassButtonArea = delayBounds.removeFromTop(buttonHeight);
-    delayBounds.removeFromTop(10);
+    delayBounds.removeFromTop(1);
     auto initialdelayBoundsWidth = delayBounds.getWidth();
     auto delayColumn1 = delayBounds.removeFromLeft(initialdelayBoundsWidth * 0.3333);
     auto delayColumn2 = delayBounds.removeFromLeft(initialdelayBoundsWidth * 0.3333);
