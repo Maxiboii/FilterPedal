@@ -720,34 +720,38 @@ void FilterPedalAudioProcessorEditor::resized()
     
     auto initialBoundsWidth = bounds.getWidth();
     auto filterBounds = bounds.removeFromLeft(initialBoundsWidth * 0.4);
-    auto saturationBounds = bounds.removeFromLeft(initialBoundsWidth * 0.2);
+    auto distortionBounds = bounds.removeFromLeft(initialBoundsWidth * 0.2);
     auto delayBounds = bounds;
     
+    auto buttonHeight = 25;
+    auto delaySliderHeight = 100;
     
     auto lowCutArea = filterBounds.removeFromLeft(filterBounds.getWidth() * 0.5);
     auto highCutArea = filterBounds;
-    auto delayBypassButtonBounds = delayBounds.removeFromTop(25);
+    
+    auto lowCutButtonArea = lowCutArea.removeFromTop(buttonHeight);
+    auto highCutButtonArea = highCutArea.removeFromTop(buttonHeight);
+    auto distortionButtonArea = distortionBounds.removeFromTop(buttonHeight);
+    auto delayBypassButtonArea = delayBounds.removeFromTop(buttonHeight);
     delayBounds.removeFromTop(10);
     auto initialdelayBoundsWidth = delayBounds.getWidth();
     auto delayColumn1 = delayBounds.removeFromLeft(initialdelayBoundsWidth * 0.3333);
     auto delayColumn2 = delayBounds.removeFromLeft(initialdelayBoundsWidth * 0.3333);
     auto delayColumn3 = delayBounds;
     
-    lowcutBypassButton.setBounds(lowCutArea.removeFromTop(25));
+    lowcutBypassButton.setBounds(lowCutButtonArea.reduced(lowCutArea.getWidth() * 0.4, 0));
     lowCutFreqSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
     lowCutSlopeSlider.setBounds(lowCutArea);
 
-    highcutBypassButton.setBounds(highCutArea.removeFromTop(25));
+    highcutBypassButton.setBounds(highCutButtonArea.reduced(highCutArea.getWidth() * 0.4, 0));
     highCutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
     highCutSlopeSlider.setBounds(highCutArea);
     
-    distortionBypassButton.setBounds(saturationBounds.removeFromTop(25));
-    distortionPreGainSlider.setBounds(saturationBounds.removeFromTop(saturationBounds.getHeight() * 0.5));
-    distortionPostGainSlider.setBounds(saturationBounds);
+    distortionBypassButton.setBounds(distortionButtonArea.reduced(distortionBounds.getWidth() * 0.4, 0));
+    distortionPreGainSlider.setBounds(distortionBounds.removeFromTop(distortionBounds.getHeight() * 0.5));
+    distortionPostGainSlider.setBounds(distortionBounds);
     
-    auto delaySliderHeight = 100;
-    
-    delayBypassButton.setBounds(delayBypassButtonBounds);
+    delayBypassButton.setBounds(delayBypassButtonArea.reduced(delayBypassButtonArea.getWidth() * 0.45, 0));
     delayDrySlider.setBounds(delayColumn1.removeFromTop(delaySliderHeight));
     delayWetSlider.setBounds(delayColumn1.removeFromTop(delaySliderHeight));
     delayFeedbackSlider.setBounds(delayColumn1.removeFromTop(delaySliderHeight));
